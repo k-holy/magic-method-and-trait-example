@@ -28,6 +28,16 @@ class ImmutableDataTest extends \PHPUnit_Framework_TestCase
 		$this->assertNotSame($now, $test->datetime);
 	}
 
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConstructorRaiseInvalidArgumentExceptionUndefinedProperty()
+	{
+		$test = new ImmutableData([
+			'undefined_property' => 'Foo',
+		]);
+	}
+
 	public function testIsset()
 	{
 		$test = new ImmutableData([
@@ -50,6 +60,15 @@ class ImmutableDataTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testGetRaiseInvalidArgumentExceptionUndefinedProperty()
+	{
+		$test = new ImmutableData();
+		$test->undefined_property;
+	}
+
+	/**
 	 * @expectedException \LogicException
 	 */
 	public function testSetRaiseLogicException()
@@ -62,6 +81,15 @@ class ImmutableDataTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testSetRaiseInvalidArgumentExceptionUndefinedProperty()
+	{
+		$test = new ImmutableData();
+		$test->undefined_property = 'Foo';
+	}
+
+	/**
 	 * @expectedException \LogicException
 	 */
 	public function testUnsetRaiseLogicException()
@@ -70,6 +98,15 @@ class ImmutableDataTest extends \PHPUnit_Framework_TestCase
 			'string' => 'Foo',
 		]);
 		unset($test->string);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testUnsetRaiseInvalidArgumentExceptionUndefinedProperty()
+	{
+		$test = new ImmutableData();
+		unset($test->undefined_property);
 	}
 
 }

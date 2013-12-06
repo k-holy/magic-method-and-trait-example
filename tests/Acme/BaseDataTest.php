@@ -28,6 +28,16 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 		$this->assertSame($now, $test->datetime);
 	}
 
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testConstructorRaiseInvalidArgumentExceptionUndefinedProperty()
+	{
+		$test = new BaseData([
+			'undefined_property' => 'Foo',
+		]);
+	}
+
 	public function testIsset()
 	{
 		$test = new BaseData([
@@ -49,6 +59,15 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 		$this->assertNull($test->null);
 	}
 
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testGetRaiseInvalidArgumentExceptionUndefinedProperty()
+	{
+		$test = new BaseData();
+		$test->undefined_property;
+	}
+
 	public function testSet()
 	{
 		$test = new BaseData([
@@ -59,6 +78,15 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 		$test->boolean = false;
 		$this->assertEquals('Bar', $test->string);
 		$this->assertFalse($test->boolean);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testSetRaiseInvalidArgumentExceptionUndefinedProperty()
+	{
+		$test = new BaseData();
+		$test->undefined_property = 'Foo';
 	}
 
 	public function testSetObject()
@@ -80,6 +108,15 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 		$this->assertNotNull($test->string);
 		unset($test->string);
 		$this->assertNull($test->string);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testUnsetRaiseInvalidArgumentExceptionUndefinedProperty()
+	{
+		$test = new BaseData();
+		unset($test->undefined_property);
 	}
 
 	public function testSerializable()
