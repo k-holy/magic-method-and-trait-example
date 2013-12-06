@@ -1,0 +1,19 @@
+{
+    "name": "k-holy/magic-method-and-trait-example",
+    "homepage": "https://github.com/k-holy/magic-method-and-trait-example",
+    "type": "library",
+    "description": "example",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "k-holy",
+            "email": "k.holy74@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-0": { "Acme": "src" }
+    },
+    "require": {
+        "php": ">=5.4"
+    }
+}
