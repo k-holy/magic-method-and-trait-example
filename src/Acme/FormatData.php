@@ -40,10 +40,6 @@ class FormatData implements BaseInterface
 				)
 			);
 		}
-		$timezone = $this->options('timezone');
-		if (isset($timezone)) {
-			$savedDate->setTimezone($timezone);
-		}
 		$this->savedDate = $savedDate;
 	}
 

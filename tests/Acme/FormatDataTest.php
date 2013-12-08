@@ -65,22 +65,6 @@ class FormatDataTest extends \PHPUnit_Framework_TestCase
 		);
 	}
 
-	public function testSetSavedDateByStringWithTimezone()
-	{
-		$now = new \DateTime();
-		$test = new FormatData([
-			'savedDate' => $now->format('Y-m-d H:i:s'),
-			'options' => [
-				'timezone' => new \DateTimeZone('Asia/Tokyo'),
-			],
-		]);
-		$this->assertInstanceOf('\DateTime', $test->savedDate);
-		$this->assertEquals(
-			$now->format('Y-m-d H:i:s'),
-			$test->savedDate->format('Y-m-d H:i:s')
-		);
-	}
-
 	/**
 	 * @expectedException \InvalidArgumentException
 	 */
