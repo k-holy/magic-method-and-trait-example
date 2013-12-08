@@ -158,4 +158,24 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 		$this->assertNotSame($test->datetime, $cloned->datetime);
 	}
 
+	public function testTraversable()
+	{
+		$properties = [
+			'string'   => 'Foo',
+			'null'     => null,
+			'boolean'  => true,
+			'datetime' => new \DateTime(),
+		];
+		$test = new BaseData($properties);
+		foreach ($test as $name => $value) {
+			if (array_key_exists($name, $properties)) {
+				if (is_object($value)) {
+					$this->assertSame($properties[$name], $value);
+				} else {
+					$this->assertEquals($properties[$name], $value);
+				}
+			}
+		}
+	}
+
 }

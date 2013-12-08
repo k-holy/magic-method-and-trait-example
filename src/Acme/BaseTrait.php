@@ -140,6 +140,16 @@ trait BaseTrait
 	}
 
 	/**
+	 * IteratorAggregate::getIterator()
+	 *
+	 * @return \ArrayIterator
+	 */
+	public function getIterator()
+	{
+		return new \ArrayIterator(get_object_vars($this));
+	}
+
+	/**
 	 * @param string  $string
 	 * @return string
 	 */

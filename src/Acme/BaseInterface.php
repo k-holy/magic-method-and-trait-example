@@ -66,4 +66,11 @@ interface BaseInterface
 	 */
 	public static function __set_state($properties);
 
+	/**
+	 * IteratorAggregate::getIterator()
+	 *
+	 * @return \ArrayIterator
+	 */
+	public function getIterator();
+
 }

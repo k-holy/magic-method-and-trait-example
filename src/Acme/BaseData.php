@@ -8,7 +8,7 @@
 
 namespace Acme;
 
-class BaseData implements BaseInterface
+class BaseData implements BaseInterface, \IteratorAggregate
 {
 	use BaseTrait;
 
