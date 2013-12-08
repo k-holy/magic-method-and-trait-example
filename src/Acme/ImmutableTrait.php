@@ -60,10 +60,17 @@ trait ImmutableTrait
 	final private function initialize(array $properties = array())
 	{
 		foreach (array_keys(get_object_vars($this)) as $name) {
+			$this->{$name} = null;
 			if (array_key_exists($name, $properties)) {
-				$this->{$name} = (is_object($properties[$name]))
+				$value = (is_object($properties[$name]))
 					? clone $properties[$name]
 					: $properties[$name];
+				$camelize = $this->camelize($name);
+				if (method_exists($this, 'set' . $camelize)) {
+					$this->{'set' . $camelize}($value);
+				} else {
+					$this->{$name} = $value;
+				}
 				unset($properties[$name]);
 			}
 		}

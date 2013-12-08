@@ -25,8 +25,9 @@ trait BaseTrait
 	public function initialize(array $properties = array())
 	{
 		foreach (array_keys(get_object_vars($this)) as $name) {
+			$this->{$name} = null;
 			if (array_key_exists($name, $properties)) {
-				$this->{$name} = $properties[$name];
+				$this->__set($name, $properties[$name]);
 				unset($properties[$name]);
 			}
 		}
@@ -58,6 +59,10 @@ trait BaseTrait
 	 */
 	public function __get($name)
 	{
+		$camelize = $this->camelize($name);
+		if (method_exists($this, 'get' . $camelize)) {
+			return $this->{'get' . $camelize}();
+		}
 		if (!property_exists($this, $name)) {
 			throw new \InvalidArgumentException(
 				sprintf('The property "%s" does not exists.', $name)
@@ -74,6 +79,10 @@ trait BaseTrait
 	 */
 	public function __set($name, $value)
 	{
+		$camelize = $this->camelize($name);
+		if (method_exists($this, 'set' . $camelize)) {
+			return $this->{'set' . $camelize}($value);
+		}
 		if (!property_exists($this, $name)) {
 			throw new \InvalidArgumentException(
 				sprintf('The property "%s" does not exists.', $name)
@@ -128,6 +137,15 @@ trait BaseTrait
 	public static function __set_state($properties)
 	{
 		return new static($properties);
+	}
+
+	/**
+	 * @param string  $string
+	 * @return string
+	 */
+	private function camelize($string)
+	{
+		return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));
 	}
 
 }
