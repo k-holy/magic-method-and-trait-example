@@ -13,7 +13,7 @@ namespace Acme;
  *
  * @author k.holy74@gmail.com
  */
-interface BaseInterface
+interface BaseInterface extends \IteratorAggregate
 {
 
 	/**
