@@ -28,8 +28,8 @@ class JsonSerializablePDOStatement extends \PDOStatement implements \JsonSeriali
 	public function jsonSerialize()
 	{
 		$jsonSerializer = new JsonSerializer();
+		$values = [];
 		if (isset($this->fetchStyleForJson[0]) && $this->fetchStyleForJson[0] === \PDO::FETCH_FUNC) {
-			$values = [];
 			while ($item = $this->fetch(\PDO::FETCH_NUM)) {
 				$values[] = $jsonSerializer(call_user_func_array($this->fetchStyleForJson[1], $item));
 			}
@@ -47,7 +47,6 @@ class JsonSerializablePDOStatement extends \PDOStatement implements \JsonSeriali
 				$this->setFetchMode($this->fetchStyleForJson[0], $this->fetchStyleForJson[1], $this->fetchStyleForJson[2]);
 				break;
 			}
-			$values = [];
 			while ($item = $this->fetch($this->fetchStyleForJson[0])) {
 				$values[] = $jsonSerializer($item);
 			}
