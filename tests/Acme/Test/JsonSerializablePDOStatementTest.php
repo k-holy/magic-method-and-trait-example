@@ -65,6 +65,28 @@ SQL
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $records[1]['created_at']);
 	}
 
+	public function testJsonSerializeWithFetchStyleForJsonIsFetchObject()
+	{
+		$now = new \DateTime();
+
+		$pdo = $this->createRecord($now);
+
+		$statement = $pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id");
+		$statement->execute();
+		$statement->setFetchStyleForJson([
+			\PDO::FETCH_OBJ,
+		]);
+		$records = $statement->jsonSerialize();
+
+		$this->assertEquals('1', $records[0]->user_id);
+		$this->assertEquals('test1', $records[0]->user_name);
+		$this->assertEquals($now->format('Y-m-d H:i:s'), $records[0]->created_at);
+
+		$this->assertEquals('2', $records[1]->user_id);
+		$this->assertEquals('test2', $records[1]->user_name);
+		$this->assertEquals($now->format('Y-m-d H:i:s'), $records[1]->created_at);
+	}
+
 	public function testJsonSerializeWithFetchStyleForJsonIsFetchIntoUser()
 	{
 		$now = new \DateTime();
