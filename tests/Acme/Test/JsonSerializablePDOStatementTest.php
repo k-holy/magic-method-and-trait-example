@@ -8,7 +8,7 @@
 
 namespace Acme\Test;
 
-use Acme\Test\User;
+use Acme\User;
 
 /**
  * Test for BaseTrait with JsonSerializableTrait
@@ -124,7 +124,7 @@ SQL
 		$statement->execute();
 		$statement->setFetchStyleForJson([
 			\PDO::FETCH_CLASS,
-			'\Acme\Test\User',
+			'\Acme\User',
 			[null, \DateTime::RFC3339],
 		]);
 		$records = $statement->jsonSerialize();

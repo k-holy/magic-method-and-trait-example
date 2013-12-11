@@ -6,7 +6,7 @@
  * @license The MIT License (MIT)
  */
 
-namespace Acme\Test;
+namespace Acme;
 
 use Acme\BaseInterface;
 use Acme\BaseTrait;
