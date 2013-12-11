@@ -27,7 +27,7 @@ trait JsonSerializableTrait
 	 * DateTime または DateTimeInterface であれば RFC3339 形式の文字列に変換して返します。
 	 * Traversable であればイテレーションで取得した値を無名オブジェクトにセットして返します。
 	 * stdClass であれば get_object_vars() で取得した値を無名オブジェクトにセットして返します。
-	 * 上記以外の値は JSONエンコード → JSONデコード の結果を返します。
+	 * 上記以外の値がああれば \LogicException をスローします。
 	 *
 	 * @return object
 	 * @throws \LogicException
