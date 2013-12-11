@@ -6,22 +6,20 @@
  * @license The MIT License (MIT)
  */
 
-namespace Acme\Tests;
-
-use Acme\BaseData;
+namespace Acme\Test;
 
 /**
- * Test for BaseData
+ * Test for BaseTrait
  *
  * @author k.holy74@gmail.com
  */
-class BaseDataTest extends \PHPUnit_Framework_TestCase
+class BaseTraitTest extends \PHPUnit_Framework_TestCase
 {
 
 	public function testConstructor()
 	{
 		$now = new \DateTime();
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'datetime' => $now,
 		]);
 		$this->assertEquals($now, $test->datetime);
@@ -33,14 +31,14 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testConstructorRaiseInvalidArgumentExceptionUndefinedProperty()
 	{
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'undefined_property' => 'Foo',
 		]);
 	}
 
 	public function testIsset()
 	{
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'string' => 'Foo',
 			'null'   => null,
 		]);
@@ -51,7 +49,7 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 
 	public function testGet()
 	{
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'string' => 'Foo',
 			'null'   => null,
 		]);
@@ -64,13 +62,13 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testGetRaiseInvalidArgumentExceptionUndefinedProperty()
 	{
-		$test = new BaseData();
+		$test = new BaseTraitTestData();
 		$test->undefined_property;
 	}
 
 	public function testSet()
 	{
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'string'  => 'Foo',
 			'boolean' => true,
 		]);
@@ -85,14 +83,14 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testSetRaiseInvalidArgumentExceptionUndefinedProperty()
 	{
-		$test = new BaseData();
+		$test = new BaseTraitTestData();
 		$test->undefined_property = 'Foo';
 	}
 
 	public function testSetObject()
 	{
 		$now = new \DateTime();
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'datetime' => $now,
 		]);
 		$this->assertSame($now, $test->datetime);
@@ -102,7 +100,7 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 
 	public function testUnset()
 	{
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'string' => 'Foo',
 		]);
 		$this->assertNotNull($test->string);
@@ -115,13 +113,13 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testUnsetRaiseInvalidArgumentExceptionUndefinedProperty()
 	{
-		$test = new BaseData();
+		$test = new BaseTraitTestData();
 		unset($test->undefined_property);
 	}
 
 	public function testSerializable()
 	{
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'string'   => 'Foo',
 			'null'     => null,
 			'boolean'  => true,
@@ -134,7 +132,7 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 
 	public function testVarExport()
 	{
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'string'   => 'Foo',
 			'null'     => null,
 			'boolean'  => true,
@@ -147,7 +145,7 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 
 	public function testClone()
 	{
-		$test = new BaseData([
+		$test = new BaseTraitTestData([
 			'string'   => 'Foo',
 			'null'     => null,
 			'boolean'  => true,
@@ -166,7 +164,7 @@ class BaseDataTest extends \PHPUnit_Framework_TestCase
 			'boolean'  => true,
 			'datetime' => new \DateTime(),
 		];
-		$test = new BaseData($properties);
+		$test = new BaseTraitTestData($properties);
 		foreach ($test as $name => $value) {
 			if (array_key_exists($name, $properties)) {
 				if (is_object($value)) {

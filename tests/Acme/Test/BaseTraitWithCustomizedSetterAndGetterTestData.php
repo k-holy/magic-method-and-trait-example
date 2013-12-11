@@ -6,30 +6,34 @@
  * @license The MIT License (MIT)
  */
 
-namespace Acme;
+namespace Acme\Test;
 
-final class FormatImmutableData implements BaseInterface
+use Acme\BaseInterface;
+use Acme\BaseTrait;
+
+/**
+ * TestData for BaseTrait with customized setter and getter
+ *
+ * @author k.holy74@gmail.com
+ */
+class BaseTraitWithCustomizedSetterAndGetterTestData implements BaseInterface
 {
-	use BaseTrait, ImmutableTrait {
-		ImmutableTrait::initialize insteadof BaseTrait;
-		ImmutableTrait::__set insteadof BaseTrait;
-		ImmutableTrait::__unset insteadof BaseTrait;
-	}
+	use BaseTrait;
 
 	private $savedDate;
 	private $options;
 
-	final public function __construct(array $properties = array())
+	public function __construct(array $properties = array())
 	{
 		$this->initialize($properties);
 	}
 
-	final private function options($name)
+	private function options($name)
 	{
 		return isset($this->options[$name]) ? $this->options[$name] : null;
 	}
 
-	final private function setSavedDate($savedDate)
+	public function setSavedDate($savedDate)
 	{
 		if (is_int($savedDate)) {
 			$savedDate = new \DateTime(sprintf('@%d', $savedDate));
@@ -47,7 +51,7 @@ final class FormatImmutableData implements BaseInterface
 		$this->savedDate = $savedDate;
 	}
 
-	final public function getSavedDateAsString()
+	public function getSavedDateAsString()
 	{
 		$dateTimeFormat = $this->options('dateTimeFormat');
 		return $this->savedDate->format($dateTimeFormat ?: 'Y-m-d H:i:s');

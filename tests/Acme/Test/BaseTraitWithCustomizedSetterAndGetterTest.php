@@ -6,32 +6,41 @@
  * @license The MIT License (MIT)
  */
 
-namespace Acme\Tests;
-
-use Acme\FormatImmutableData;
+namespace Acme\Test;
 
 /**
- * Test for FormatImmutableData
+ * Test for BaseTrait with customized setter and getter
  *
  * @author k.holy74@gmail.com
  */
-class FormatImmutableDataTest extends \PHPUnit_Framework_TestCase
+class BaseTraitWithCustomizedSetterAndGetterTest extends \PHPUnit_Framework_TestCase
 {
 
-	public function testConstructorDefensiveCopy()
+	public function testConstructor()
 	{
 		$now = new \DateTime();
-		$test = new FormatImmutableData([
+		$test = new BaseTraitWithCustomizedSetterAndGetterTestData([
 			'savedDate' => $now,
 		]);
 		$this->assertEquals($now, $test->savedDate);
+		$this->assertSame($now, $test->savedDate);
+	}
+
+	public function testSetSavedDate()
+	{
+		$now = new \DateTime();
+		$test = new BaseTraitWithCustomizedSetterAndGetterTestData([
+			'savedDate' => $now,
+		]);
+		$this->assertSame($now, $test->savedDate);
+		$test->savedDate = new \DateTime();
 		$this->assertNotSame($now, $test->savedDate);
 	}
 
 	public function testSetSavedDateByTimestamp()
 	{
 		$now = new \DateTime();
-		$test = new FormatImmutableData([
+		$test = new BaseTraitWithCustomizedSetterAndGetterTestData([
 			'savedDate' => $now->getTimestamp(),
 		]);
 		$this->assertInstanceOf('\DateTime', $test->savedDate);
@@ -44,7 +53,7 @@ class FormatImmutableDataTest extends \PHPUnit_Framework_TestCase
 	public function testSetSavedDateByString()
 	{
 		$now = new \DateTime();
-		$test = new FormatImmutableData([
+		$test = new BaseTraitWithCustomizedSetterAndGetterTestData([
 			'savedDate' => $now->format('Y-m-d H:i:s'),
 		]);
 		$this->assertInstanceOf('\DateTime', $test->savedDate);
@@ -59,7 +68,7 @@ class FormatImmutableDataTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testSetSavedDateRaiseInvalidArgumentExceptionInvalidObject()
 	{
-		$test = new FormatImmutableData([
+		$test = new BaseTraitWithCustomizedSetterAndGetterTestData([
 			'savedDate' => new \stdClass(),
 		]);
 	}
@@ -69,7 +78,7 @@ class FormatImmutableDataTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testSetSavedDateRaiseInvalidArgumentExceptionInvalidType()
 	{
-		$test = new FormatImmutableData([
+		$test = new BaseTraitWithCustomizedSetterAndGetterTestData([
 			'savedDate' => true,
 		]);
 	}
@@ -77,7 +86,7 @@ class FormatImmutableDataTest extends \PHPUnit_Framework_TestCase
 	public function testGetSavedDateAsString()
 	{
 		$now = new \DateTime();
-		$test = new FormatImmutableData([
+		$test = new BaseTraitWithCustomizedSetterAndGetterTestData([
 			'savedDate' => $now,
 		]);
 		$this->assertEquals(
@@ -89,7 +98,7 @@ class FormatImmutableDataTest extends \PHPUnit_Framework_TestCase
 	public function testGetSavedDateAsStringWithDateTimeFormat()
 	{
 		$now = new \DateTime();
-		$test = new FormatImmutableData([
+		$test = new BaseTraitWithCustomizedSetterAndGetterTestData([
 			'savedDate' => $now,
 			'options' => [
 				'dateTimeFormat' => 'Y/n/j H:i:s',
@@ -99,55 +108,6 @@ class FormatImmutableDataTest extends \PHPUnit_Framework_TestCase
 			$now->format('Y/n/j H:i:s'),
 			$test->savedDateAsString
 		);
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testGetRaiseInvalidArgumentExceptionUndefinedProperty()
-	{
-		$test = new FormatImmutableData();
-		$test->undefined_property;
-	}
-
-	/**
-	 * @expectedException \LogicException
-	 */
-	public function testSetRaiseLogicException()
-	{
-		$test = new FormatImmutableData([
-			'savedDate' => new \DateTime(),
-		]);
-		$test->savedDate = new \DateTime();
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testSetRaiseInvalidArgumentExceptionUndefinedProperty()
-	{
-		$test = new FormatImmutableData();
-		$test->undefined_property = 'Foo';
-	}
-
-	/**
-	 * @expectedException \LogicException
-	 */
-	public function testUnsetRaiseLogicException()
-	{
-		$test = new FormatImmutableData([
-			'savedDate' => new \DateTime(),
-		]);
-		unset($test->savedData);
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testUnsetRaiseInvalidArgumentExceptionUndefinedProperty()
-	{
-		$test = new FormatImmutableData();
-		unset($test->undefined_property);
 	}
 
 }

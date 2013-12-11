@@ -6,12 +6,19 @@
  * @license The MIT License (MIT)
  */
 
-namespace Acme;
+namespace Acme\Test;
 
-class ArrayAccessData implements BaseInterface, \ArrayAccess
+use Acme\BaseInterface;
+use Acme\BaseTrait;
+
+/**
+ * TestData for BaseTrait
+ *
+ * @author k.holy74@gmail.com
+ */
+class BaseTraitTestData implements BaseInterface
 {
 	use BaseTrait;
-	use ArrayAccessTrait;
 
 	private $string;
 	private $null;

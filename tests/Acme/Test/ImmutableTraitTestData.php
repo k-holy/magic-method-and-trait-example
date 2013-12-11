@@ -6,9 +6,18 @@
  * @license The MIT License (MIT)
  */
 
-namespace Acme;
+namespace Acme\Test;
 
-final class ImmutableData implements BaseInterface
+use Acme\BaseInterface;
+use Acme\BaseTrait;
+use Acme\ImmutableTrait;
+
+/**
+ * TestData for ImmutableTrait
+ *
+ * @author k.holy74@gmail.com
+ */
+final class ImmutableTraitTestData implements BaseInterface
 {
 	use BaseTrait, ImmutableTrait {
 		ImmutableTrait::initialize insteadof BaseTrait;
