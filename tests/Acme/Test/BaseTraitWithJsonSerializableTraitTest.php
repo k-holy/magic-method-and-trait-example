@@ -39,6 +39,17 @@ class BaseTraitWithJsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($now->format(\DateTime::RFC3339), $object->datetime);
 	}
 
+	public function testJsonSerializeJsonserializable()
+	{
+		$now = new JsonSerializableDateTime();
+		$now->setFormat(\DateTime::RFC2822);
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
+			'datetime' => $now,
+		]);
+		$object = $data->jsonSerialize();
+		$this->assertEquals($now->jsonSerialize(), $object->datetime);
+	}
+
 	public function testJsonSerializeArray()
 	{
 		$data = new BaseTraitWithJsonSerializableTraitTestData([
