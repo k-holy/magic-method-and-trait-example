@@ -67,9 +67,7 @@ SQL
 
 	public function testJsonSerializeWithFetchStyleForJsonIsFetchIntoUser()
 	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTime();
 
 		$pdo = $this->createRecord($now);
 
@@ -79,7 +77,7 @@ SQL
 		$statement->execute();
 		$statement->setFetchStyleForJson([
 			\PDO::FETCH_INTO,
-			new User(null, $timezone, \DateTime::RFC3339),
+			new User(null, \DateTime::RFC3339),
 		]);
 		$records = $statement->jsonSerialize();
 
@@ -94,9 +92,7 @@ SQL
 
 	public function testJsonSerializeWithFetchStyleForJsonIsFetchClassUser()
 	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTime();
 
 		$pdo = $this->createRecord($now);
 
@@ -107,7 +103,7 @@ SQL
 		$statement->setFetchStyleForJson([
 			\PDO::FETCH_CLASS,
 			'\Acme\Test\User',
-			[null, $timezone, \DateTime::RFC3339],
+			[null, \DateTime::RFC3339],
 		]);
 		$records = $statement->jsonSerialize();
 
@@ -122,9 +118,7 @@ SQL
 
 	public function testJsonSerializeWithFetchStyleForJsonIsFetchFuncUser()
 	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTime();
 
 		$pdo = $this->createRecord($now);
 
@@ -133,14 +127,14 @@ SQL
 		$statement->execute();
 		$statement->setFetchStyleForJson([
 			\PDO::FETCH_FUNC,
-			function ($user_id, $user_name, $created_at) use ($timezone) {
+			function ($user_id, $user_name, $created_at) {
 				$user = new User(
 					[
 						'user_id'    => $user_id,
 						'user_name'  => $user_name,
 						'created_at' => $created_at,
 					],
-					$timezone, \DateTime::RFC3339
+					\DateTime::RFC3339
 				);
 				return $user;
 			},

@@ -23,16 +23,12 @@ class User implements BaseInterface, \JsonSerializable
 	private $user_id;
 	private $user_name;
 	private $created_at;
-	private $timezone;
 	private $dateFormat;
 
-	public function __construct(array $properties = null, \DateTimeZone $timezone = null, $dateFormat = null)
+	public function __construct(array $properties = null, $dateFormat = null)
 	{
 		if (isset($properties)) {
 			$this->initialize($properties);
-		}
-		if (isset($timezone)) {
-			$this->timezone = $timezone;
 		}
 		$this->dateFormat = $dateFormat ?: 'Y-m-d H:i:s';
 	}
@@ -49,9 +45,6 @@ class User implements BaseInterface, \JsonSerializable
 		$object->user_id = $this->user_id;
 		$object->user_name = $this->user_name;
 		$created_at = new \DateTime($this->created_at);
-		if (isset($this->timezone)) {
-			$created_at->setTimezone($this->timezone);
-		}
 		$object->created_at = $created_at->format($this->dateFormat);
 		return $object;
 	}
