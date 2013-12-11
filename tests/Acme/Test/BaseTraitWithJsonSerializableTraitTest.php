@@ -39,17 +39,6 @@ class BaseTraitWithJsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($now->format(\DateTime::RFC3339), $object->datetime);
 	}
 
-	public function testJsonSerializeJsonserializable()
-	{
-		$now = new JsonSerializableDateTime();
-		$now->setFormat(\DateTime::RFC2822);
-		$data = new BaseTraitWithJsonSerializableTraitTestData([
-			'datetime' => $now,
-		]);
-		$object = $data->jsonSerialize();
-		$this->assertEquals($now->jsonSerialize(), $object->datetime);
-	}
-
 	public function testJsonSerializeArray()
 	{
 		$data = new BaseTraitWithJsonSerializableTraitTestData([
@@ -94,17 +83,17 @@ class BaseTraitWithJsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($object->datetime, $object->object->datetime);
 	}
 
-	public function testJsonSerializeDateTimeInIterator()
+	public function testJsonSerializeDateTimeInTraversable()
 	{
 		$now = new \DateTime();
 		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'datetime' => $now,
-			'iterator' => new \ArrayIterator([
+			'traversable' => new \ArrayIterator([
 				'datetime' => $now,
 			]),
 		]);
 		$object = $data->jsonSerialize();
-		$this->assertEquals($object->datetime, $object->iterator->datetime);
+		$this->assertEquals($object->datetime, $object->traversable->datetime);
 	}
 
 	public function testJsonSerializeNestedJsonserializable()
@@ -147,14 +136,14 @@ class BaseTraitWithJsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 			'array' => [
 				'datetime' => $now,
 			],
-			'iterator' => new \ArrayIterator([
+			'traversable' => new \ArrayIterator([
 				'datetime' => $now,
 			]),
 		]);
 		$object = json_decode(json_encode($data)); // json_decode() の戻り値はオブジェクトまたは連想配列のどちらかのみ
 		$this->assertEquals($now->format(\DateTime::RFC3339), $object->datetime);
 		$this->assertEquals($now->format(\DateTime::RFC3339), $object->array->datetime);
-		$this->assertEquals($now->format(\DateTime::RFC3339), $object->iterator->datetime);
+		$this->assertEquals($now->format(\DateTime::RFC3339), $object->traversable->datetime);
 	}
 
 }

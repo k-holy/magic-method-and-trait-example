@@ -28,7 +28,7 @@ class BaseTraitWithJsonSerializableTraitTestData implements BaseInterface, \Json
 	private $datetime;
 	private $array;
 	private $object;
-	private $iterator;
+	private $traversable;
 	private $serializable;
 	private $any;
 
