@@ -10,27 +10,24 @@ namespace Acme\Test;
 
 use Acme\BaseInterface;
 use Acme\BaseTrait;
-use Acme\ImmutableTrait;
+use Acme\ArrayAccessTrait;
 
 /**
- * TestData for ImmutableTrait
+ * TestData for BaseTrait with ArrayAccessTrait
  *
  * @author k.holy74@gmail.com
  */
-final class ImmutableTraitTestData implements BaseInterface
+class BaseTraitWithArrayAccessTraitTestData implements BaseInterface, \ArrayAccess
 {
-	use BaseTrait, ImmutableTrait {
-		ImmutableTrait::initialize insteadof BaseTrait;
-		ImmutableTrait::__set insteadof BaseTrait;
-		ImmutableTrait::__unset insteadof BaseTrait;
-	}
+	use BaseTrait;
+	use ArrayAccessTrait;
 
 	private $string;
 	private $null;
 	private $boolean;
 	private $datetime;
 
-	final public function __construct(array $properties = array())
+	public function __construct(array $properties = array())
 	{
 		$this->initialize($properties);
 	}

@@ -8,8 +8,6 @@
 
 namespace Acme\Test;
 
-use Acme\BaseInterface;
-use Acme\BaseTrait;
 use Acme\ArrayAccessTrait;
 
 /**
@@ -17,19 +15,13 @@ use Acme\ArrayAccessTrait;
  *
  * @author k.holy74@gmail.com
  */
-class ArrayAccessTraitTestData implements BaseInterface, \ArrayAccess
+class ArrayAccessTraitTestData implements \ArrayAccess
 {
-	use BaseTrait;
 	use ArrayAccessTrait;
 
 	private $string;
 	private $null;
 	private $boolean;
 	private $datetime;
-
-	public function __construct(array $properties = array())
-	{
-		$this->initialize($properties);
-	}
 
 }

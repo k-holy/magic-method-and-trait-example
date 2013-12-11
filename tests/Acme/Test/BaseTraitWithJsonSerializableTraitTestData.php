@@ -13,11 +13,11 @@ use Acme\BaseTrait;
 use Acme\JsonSerializableTrait;
 
 /**
- * TestData for JsonSerializableTrait
+ * TestData for BaseTrait with JsonSerializableTrait
  *
  * @author k.holy74@gmail.com
  */
-class JsonSerializableTraitTestData implements BaseInterface, \JsonSerializable
+class BaseTraitWithJsonSerializableTraitTestData implements BaseInterface, \JsonSerializable
 {
 	use BaseTrait;
 	use JsonSerializableTrait;

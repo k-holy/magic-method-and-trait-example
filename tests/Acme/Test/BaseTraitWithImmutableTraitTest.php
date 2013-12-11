@@ -9,17 +9,17 @@
 namespace Acme\Test;
 
 /**
- * Test for ImmutableTrait
+ * Test for BaseTrait with ImmutableTrait
  *
  * @author k.holy74@gmail.com
  */
-class ImmutableTraitTest extends \PHPUnit_Framework_TestCase
+class BaseTraitWithImmutableTraitTest extends \PHPUnit_Framework_TestCase
 {
 
 	public function testConstructorDefensiveCopy()
 	{
 		$now = new \DateTime();
-		$test = new ImmutableTraitTestData([
+		$test = new BaseTraitWithImmutableTraitTestData([
 			'datetime' => $now,
 		]);
 		$this->assertEquals($now, $test->datetime);
@@ -31,14 +31,14 @@ class ImmutableTraitTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testConstructorRaiseInvalidArgumentExceptionUndefinedProperty()
 	{
-		$test = new ImmutableTraitTestData([
+		$test = new BaseTraitWithImmutableTraitTestData([
 			'undefined_property' => 'Foo',
 		]);
 	}
 
 	public function testIsset()
 	{
-		$test = new ImmutableTraitTestData([
+		$test = new BaseTraitWithImmutableTraitTestData([
 			'string' => 'Foo',
 			'null'   => null,
 		]);
@@ -49,7 +49,7 @@ class ImmutableTraitTest extends \PHPUnit_Framework_TestCase
 
 	public function testGet()
 	{
-		$test = new ImmutableTraitTestData([
+		$test = new BaseTraitWithImmutableTraitTestData([
 			'string' => 'Foo',
 			'null'   => null,
 		]);
@@ -62,7 +62,7 @@ class ImmutableTraitTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testGetRaiseInvalidArgumentExceptionUndefinedProperty()
 	{
-		$test = new ImmutableTraitTestData();
+		$test = new BaseTraitWithImmutableTraitTestData();
 		$test->undefined_property;
 	}
 
@@ -71,7 +71,7 @@ class ImmutableTraitTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testSetRaiseLogicException()
 	{
-		$test = new ImmutableTraitTestData([
+		$test = new BaseTraitWithImmutableTraitTestData([
 			'string'  => 'Foo',
 			'boolean' => true,
 		]);
@@ -83,7 +83,7 @@ class ImmutableTraitTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testSetRaiseInvalidArgumentExceptionUndefinedProperty()
 	{
-		$test = new ImmutableTraitTestData();
+		$test = new BaseTraitWithImmutableTraitTestData();
 		$test->undefined_property = 'Foo';
 	}
 
@@ -92,7 +92,7 @@ class ImmutableTraitTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testUnsetRaiseLogicException()
 	{
-		$test = new ImmutableTraitTestData([
+		$test = new BaseTraitWithImmutableTraitTestData([
 			'string' => 'Foo',
 		]);
 		unset($test->string);
@@ -103,7 +103,7 @@ class ImmutableTraitTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testUnsetRaiseInvalidArgumentExceptionUndefinedProperty()
 	{
-		$test = new ImmutableTraitTestData();
+		$test = new BaseTraitWithImmutableTraitTestData();
 		unset($test->undefined_property);
 	}
 

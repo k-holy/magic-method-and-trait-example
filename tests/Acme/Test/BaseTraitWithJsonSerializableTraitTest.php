@@ -9,16 +9,16 @@
 namespace Acme\Test;
 
 /**
- * Test for JsonSerializableTrait
+ * Test for BaseTrait with JsonSerializableTrait
  *
  * @author k.holy74@gmail.com
  */
-class JsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
+class BaseTraitWithJsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 {
 
 	public function testJsonSerialize()
 	{
-		$data = new JsonSerializableTraitTestData([
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'string'  => 'Foo',
 			'null'    => null,
 			'boolean' => true,
@@ -32,7 +32,7 @@ class JsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 	public function testJsonSerializeDateTimeToStringRFC3339()
 	{
 		$now = new \DateTime();
-		$data = new JsonSerializableTraitTestData([
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'datetime' => $now,
 		]);
 		$object = $data->jsonSerialize();
@@ -41,7 +41,7 @@ class JsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 
 	public function testJsonSerializeArray()
 	{
-		$data = new JsonSerializableTraitTestData([
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'array' => [
 				'a' => 'A',
 				'b' => 'B',
@@ -60,7 +60,7 @@ class JsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 	public function testJsonSerializeDateTimeInArray()
 	{
 		$now = new \DateTime();
-		$data = new JsonSerializableTraitTestData([
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'datetime' => $now,
 			'array' => [
 				'datetime' => $now,
@@ -75,7 +75,7 @@ class JsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 		$now = new \DateTime();
 		$object = new \stdClass();
 		$object->datetime = $now;
-		$data = new JsonSerializableTraitTestData([
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'datetime' => $now,
 			'object' => $object,
 		]);
@@ -86,7 +86,7 @@ class JsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 	public function testJsonSerializeDateTimeInIterator()
 	{
 		$now = new \DateTime();
-		$data = new JsonSerializableTraitTestData([
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'datetime' => $now,
 			'iterator' => new \ArrayIterator([
 				'datetime' => $now,
@@ -99,13 +99,13 @@ class JsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 	public function testJsonSerializeNestedJsonserializable()
 	{
 		$now = new \DateTime();
-		$data = new JsonSerializableTraitTestData([
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'datetime' => $now,
-			'serializable' => new JsonSerializableTraitTestData([
+			'serializable' => new BaseTraitWithJsonSerializableTraitTestData([
 				'datetime' => $now,
-				'serializable' => new JsonSerializableTraitTestData([
+				'serializable' => new BaseTraitWithJsonSerializableTraitTestData([
 					'datetime' => $now,
-					'serializable' => new JsonSerializableTraitTestData([
+					'serializable' => new BaseTraitWithJsonSerializableTraitTestData([
 						'datetime' => $now,
 					]),
 				]),
@@ -122,7 +122,7 @@ class JsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 	 */
 	public function testJsonSerializeRaiseLogicExceptionInvalidType()
 	{
-		$data = new JsonSerializableTraitTestData([
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'any' => new \PDO('sqlite::memory:'),
 		]);
 		$object = $data->jsonSerialize();
@@ -131,7 +131,7 @@ class JsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 	public function testEncodeAndDecode()
 	{
 		$now = new \DateTime();
-		$data = new JsonSerializableTraitTestData([
+		$data = new BaseTraitWithJsonSerializableTraitTestData([
 			'datetime' => $now,
 			'array' => [
 				'datetime' => $now,
