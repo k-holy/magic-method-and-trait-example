@@ -208,11 +208,9 @@ class PDOStatement implements \IteratorAggregate, \JsonSerializable
 	 */
 	public function getIterator()
 	{
-		if ($this->fetchMode === self::FETCH_CLOSURE) {
-			return new CallbackIterator($this->statement, $this->callback);
-		}
-
-		return $this->statement;
+		return ($this->fetchMode === self::FETCH_CLOSURE)
+			? new CallbackIterator($this->statement, $this->callback)
+			: new \IteratorIterator($this->statement);
 	}
 
 	/**
@@ -229,6 +227,22 @@ class PDOStatement implements \IteratorAggregate, \JsonSerializable
 		}
 
 		return $values;
+	}
+
+	/**
+	 * __call
+	 *
+	 * @param string
+	 * @param array
+	 */
+	public function __call($name, $args)
+	{
+		if (method_exists($this->statement, $name)) {
+			return call_user_func_array(array($this->statement, $name), $args);
+		}
+		throw new \BadMethodCallException(
+			sprintf('Undefined Method "%s" called.', $name)
+		);
 	}
 
 }

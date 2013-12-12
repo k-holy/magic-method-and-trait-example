@@ -536,4 +536,38 @@ SQL
 		$this->assertEquals($now->format(\DateTime::RFC3339), $records[1]->createdAt);
 	}
 
+	public function testCallPdoStatementMethod()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
+
+		$statement->execute();
+
+		$user = $statement->fetchObject();
+		$this->assertEquals('1', $user->user_id);
+		$this->assertEquals('test1', $user->user_name);
+		$this->assertEquals($now->getTimestamp(), $user->created_at);
+	}
+
+	public function testCallPdoStatementMethodWithArguments()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
+
+		$statement->execute();
+
+		$user = $statement->fetchObject('\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
+		$this->assertEquals('1', $user->userId);
+		$this->assertEquals('test1', $user->userName);
+		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+	}
+
 }

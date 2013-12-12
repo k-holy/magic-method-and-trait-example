@@ -15,6 +15,32 @@ namespace Acme\Domain\Data;
  */
 trait UserTrait
 {
+
+	/**
+	 * __construct()
+	 *
+	 * @param array プロパティの配列
+	 * @param \DateTimeZone タイムゾーン
+	 * @param string 日付の出力書式
+	 */
+	public function __construct(array $properties = null, \DateTimeZone $timezone = null, $dateFormat = null)
+	{
+		if (isset($properties)) {
+			$this->initialize($properties);
+		}
+		if (isset($timezone)) {
+			$this->timezone = $timezone;
+		}
+		$this->dateFormat = $dateFormat ?: 'Y-m-d H:i:s';
+	}
+
+	/**
+	 * getter for createdAt
+	 *
+	 * 値をタイムスタンプと見なし、指定されたタイムゾーンおよび書式で文字列に変換して返します。
+	 *
+	 * @return string
+	 */
 	public function getCreatedAt()
 	{
 		$createdAt = new \DateTime(sprintf('@%d', $this->createdAt));

@@ -28,15 +28,4 @@ class MutableUser implements BaseInterface, \JsonSerializable
 	private $timezone;
 	private $dateFormat;
 
-	public function __construct(array $properties = null, \DateTimeZone $timezone = null, $dateFormat = null)
-	{
-		if (isset($properties)) {
-			$this->initialize($properties);
-		}
-		if (isset($timezone)) {
-			$this->timezone = $timezone;
-		}
-		$this->dateFormat = $dateFormat ?: 'Y-m-d H:i:s';
-	}
-
 }
