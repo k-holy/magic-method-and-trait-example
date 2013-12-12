@@ -513,4 +513,19 @@ SQL
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 	}
 
+	/**
+	 * @expectedException \BadMethodCallException
+	 */
+	public function testRaiseExceptionWhenUndefinedMethodIsCalled()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
+
+		$statement->undefinedMethod();
+	}
+
 }
