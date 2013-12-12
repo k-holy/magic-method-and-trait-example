@@ -22,7 +22,6 @@ trait JsonSerializableTrait
 	 * JsonSerializable::jsonSerialize
 	 *
 	 * @return object
-	 * @throws \LogicException
 	 */
 	public function jsonSerialize()
 	{

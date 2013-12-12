@@ -47,10 +47,6 @@ class JsonSerializablePDOStatement extends \PDOStatement implements \JsonSeriali
 				$this->setFetchMode($this->fetchStyleForJson[0], $this->fetchStyleForJson[1], $this->fetchStyleForJson[2]);
 				break;
 			}
-			while ($item = $this->fetch($this->fetchStyleForJson[0])) {
-				$values[] = $jsonSerializer($item);
-			}
-			return $values;
 		}
 		foreach ($this as $i => $item) {
 			$values[$i] = $jsonSerializer($item);

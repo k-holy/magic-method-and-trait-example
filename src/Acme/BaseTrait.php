@@ -21,6 +21,7 @@ trait BaseTrait
 	 *
 	 * @param array プロパティの配列
 	 * @return self
+	 * @throws \InvalidArgumentException
 	 */
 	public function initialize(array $properties = array())
 	{
@@ -56,6 +57,7 @@ trait BaseTrait
 	 * __get
 	 *
 	 * @param mixed
+	 * @throws \InvalidArgumentException
 	 */
 	public function __get($name)
 	{
@@ -76,6 +78,7 @@ trait BaseTrait
 	 *
 	 * @param mixed
 	 * @param mixed
+	 * @throws \InvalidArgumentException
 	 */
 	public function __set($name, $value)
 	{
@@ -95,6 +98,7 @@ trait BaseTrait
 	 * __unset
 	 *
 	 * @param mixed
+	 * @throws \InvalidArgumentException
 	 */
 	public function __unset($name)
 	{

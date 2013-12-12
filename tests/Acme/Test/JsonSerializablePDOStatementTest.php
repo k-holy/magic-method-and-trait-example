@@ -8,7 +8,8 @@
 
 namespace Acme\Test;
 
-use Acme\User;
+use Acme\Domain\Data\ImmutableUser;
+use Acme\Domain\Data\MutableUser;
 
 /**
  * Test for BaseTrait with JsonSerializableTrait
@@ -23,153 +24,125 @@ class JsonSerializablePDOStatementTest extends \PHPUnit_Framework_TestCase
 		$pdo = new \PDO('sqlite::memory:', null, null, [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
 			\PDO::ATTR_STATEMENT_CLASS => ['\Acme\JsonSerializablePDOStatement'],
-			\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
 		]);
 
 		$pdo->exec('DROP TABLE IF EXISTS users;');
 		$pdo->exec(<<<'SQL'
 CREATE TABLE users(
-  user_id    INTEGER     NOT NULL PRIMARY KEY AUTOINCREMENT 
-, user_name  TEXT        NOT NULL
-, created_at DATETIME    NOT NULL
+  user_id    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT 
+, user_name  TEXT    NOT NULL
+, created_at INTEGER NOT NULL
 );
 SQL
 		);
 
 		$pdo->beginTransaction();
-		$statement = $pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, datetime(:created_at))");
-		$statement->execute([':user_name' => 'test1', ':created_at' => $now->format('Y-m-d H:i:s')]);
-		$statement->execute([':user_name' => 'test2', ':created_at' => $now->format('Y-m-d H:i:s')]);
+		$statement = $pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)");
+		$statement->execute([':user_name' => 'test1', ':created_at' => $now->getTimestamp()]);
+		$statement->execute([':user_name' => 'test2', ':created_at' => $now->getTimestamp()]);
 		$pdo->commit();
 
 		return $pdo;
 	}
 
-	public function testJsonSerialize()
+	public function testJsonSerializeByFetchAssoc()
 	{
-
-		$now = new \DateTime();
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
 		$statement = $pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id");
 		$statement->execute();
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
 		$records = $statement->jsonSerialize();
 
 		$this->assertEquals('1', $records[0]['user_id']);
 		$this->assertEquals('test1', $records[0]['user_name']);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $records[0]['created_at']);
+		$this->assertEquals($now->getTimestamp(), $records[0]['created_at']);
 
 		$this->assertEquals('2', $records[1]['user_id']);
 		$this->assertEquals('test2', $records[1]['user_name']);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $records[1]['created_at']);
+		$this->assertEquals($now->getTimestamp(), $records[1]['created_at']);
 	}
 
-	public function testJsonSerializeWithFetchStyleForJsonIsFetchObject()
+	public function testJsonSerializeByFetchObject()
 	{
-		$now = new \DateTime();
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
-		$statement = $pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id");
+		$statement = $pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id");
 		$statement->execute();
-		$statement->setFetchStyleForJson([
-			\PDO::FETCH_OBJ,
-		]);
+		$statement->setFetchMode(\PDO::FETCH_OBJ);
 		$records = $statement->jsonSerialize();
 
-		$this->assertEquals('1', $records[0]->user_id);
-		$this->assertEquals('test1', $records[0]->user_name);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $records[0]->created_at);
+		$this->assertEquals('1', $records[0]->userId);
+		$this->assertEquals('test1', $records[0]->userName);
+		$this->assertEquals($now->getTimestamp(), $records[0]->createdAt);
 
-		$this->assertEquals('2', $records[1]->user_id);
-		$this->assertEquals('test2', $records[1]->user_name);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $records[1]->created_at);
+		$this->assertEquals('2', $records[1]->userId);
+		$this->assertEquals('test2', $records[1]->userName);
+		$this->assertEquals($now->getTimestamp(), $records[1]->createdAt);
 	}
 
-	public function testJsonSerializeWithFetchStyleForJsonIsFetchIntoUser()
+	public function testJsonSerializeByFetchClass()
 	{
-		$now = new \DateTime();
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
-		// \PDO::FETCH_INTO および \PDO::FETCH_CLASS でのオブジェクト生成は、プロパティのセット後にコンストラクタが呼ばれる。
-		// また __set() などは一切呼ばれず、プロパティの可視性も無視される。
-		$statement = $pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id");
+		$statement = $pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id");
 		$statement->execute();
-		$statement->setFetchStyleForJson([
-			\PDO::FETCH_INTO,
-			new User(null, \DateTime::RFC3339),
-		]);
+		$statement->setFetchMode(\PDO::FETCH_CLASS, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, \DateTime::RFC3339]);
 		$records = $statement->jsonSerialize();
 
-		$this->assertEquals('1', $records[0]->user_id);
-		$this->assertEquals('test1', $records[0]->user_name);
-		$this->assertEquals($now->format(\DateTime::RFC3339), $records[0]->created_at);
+		$this->assertEquals('1', $records[0]->userId);
+		$this->assertEquals('test1', $records[0]->userName);
+		$this->assertEquals($now->format(\DateTime::RFC3339), $records[0]->createdAt);
 
-		$this->assertEquals('2', $records[1]->user_id);
-		$this->assertEquals('test2', $records[1]->user_name);
-		$this->assertEquals($now->format(\DateTime::RFC3339), $records[1]->created_at);
+		$this->assertEquals('2', $records[1]->userId);
+		$this->assertEquals('test2', $records[1]->userName);
+		$this->assertEquals($now->format(\DateTime::RFC3339), $records[1]->createdAt);
 	}
 
-	public function testJsonSerializeWithFetchStyleForJsonIsFetchClassUser()
+	public function testJsonSerializeByFetchInto()
 	{
-		$now = new \DateTime();
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
-		// \PDO::FETCH_INTO および \PDO::FETCH_CLASS でのオブジェクト生成は、プロパティのセット後にコンストラクタが呼ばれる。
-		// また __set() などは一切呼ばれず、プロパティの可視性も無視される。
-		$statement = $pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id");
+		$statement = $pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id");
 		$statement->execute();
-		$statement->setFetchStyleForJson([
-			\PDO::FETCH_CLASS,
-			'\Acme\User',
-			[null, \DateTime::RFC3339],
-		]);
+		$statement->setFetchMode(\PDO::FETCH_INTO, new MutableUser(null, $timezone, \DateTime::RFC3339));
 		$records = $statement->jsonSerialize();
 
-		$this->assertEquals('1', $records[0]->user_id);
-		$this->assertEquals('test1', $records[0]->user_name);
-		$this->assertEquals($now->format(\DateTime::RFC3339), $records[0]->created_at);
+		$this->assertEquals('1', $records[0]->userId);
+		$this->assertEquals('test1', $records[0]->userName);
+		$this->assertEquals($now->format(\DateTime::RFC3339), $records[0]->createdAt);
 
-		$this->assertEquals('2', $records[1]->user_id);
-		$this->assertEquals('test2', $records[1]->user_name);
-		$this->assertEquals($now->format(\DateTime::RFC3339), $records[1]->created_at);
+		$this->assertEquals('2', $records[1]->userId);
+		$this->assertEquals('test2', $records[1]->userName);
+		$this->assertEquals($now->format(\DateTime::RFC3339), $records[1]->createdAt);
 	}
 
-	public function testJsonSerializeWithFetchStyleForJsonIsFetchFuncUser()
+	/**
+	 * @expectedException \LogicException
+	 */
+	public function testJsonSerializeByFetchIntoRaiseLogicExceptionWhenObjectIsImmutable()
 	{
-		$now = new \DateTime();
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
-		// \PDO::FETCH_FUNC でのオブジェクト生成は書いた通り動作する。
-		$statement = $pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id");
+		$statement = $pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id");
 		$statement->execute();
-		$statement->setFetchStyleForJson([
-			\PDO::FETCH_FUNC,
-			function ($user_id, $user_name, $created_at) {
-				$user = new User(
-					[
-						'user_id'    => $user_id,
-						'user_name'  => $user_name,
-						'created_at' => $created_at,
-					],
-					\DateTime::RFC3339
-				);
-				return $user;
-			},
-		]);
+		$statement->setFetchMode(\PDO::FETCH_INTO, new ImmutableUser(null, $timezone, \DateTime::RFC3339));
 		$records = $statement->jsonSerialize();
-
-		$this->assertEquals('1', $records[0]->user_id);
-		$this->assertEquals('test1', $records[0]->user_name);
-		$this->assertEquals($now->format(\DateTime::RFC3339), $records[0]->created_at);
-
-		$this->assertEquals('2', $records[1]->user_id);
-		$this->assertEquals('test2', $records[1]->user_name);
-		$this->assertEquals($now->format(\DateTime::RFC3339), $records[1]->created_at);
 	}
 
 }
