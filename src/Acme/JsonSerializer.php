@@ -84,11 +84,11 @@ class JsonSerializer implements \JsonSerializable
 				return $value->format(\DateTime::RFC3339);
 			}
 			if ($value instanceof \Traversable) {
-				$object = new \stdClass;
+				$array = [];
 				foreach ($value as $name => $val) {
-					$object->{$name} = $this->convert($val);
+					$array[$name] = $this->convert($val);
 				}
-				return $object;
+				return $array;
 			}
 			if ($value instanceof \stdClass) {
 				$object = new \stdClass;

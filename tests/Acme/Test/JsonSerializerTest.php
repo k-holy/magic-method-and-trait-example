@@ -54,10 +54,21 @@ class JsonSerializerTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals('C', $data['c']);
 	}
 
-	public function testJsonSerializeJsonSerializable()
+	public function testJsonSerializeDateTimeToStringRFC3339()
 	{
-		$serializer = new JsonSerializer(new JsonSerializer(['a' => 'A', 'b' => 'B', 'c' => 'C']));
+		$now = new \DateTime();
+		$serializer = new JsonSerializer($now);
 		$data = $serializer->jsonSerialize();
+		// DateTime および DateTimeInterface は RFC3339 でフォーマットされた文字列に変換される。
+		$this->assertEquals($now->format(\DateTime::RFC3339), $data);
+	}
+
+	public function testJsonSerializeTraversableToArray()
+	{
+		$serializer = new JsonSerializer(new \ArrayIterator(['a' => 'A', 'b' => 'B', 'c' => 'C']));
+		$data = $serializer->jsonSerialize();
+		// Traversableは 全て配列に変換される。
+		// 配列のキーに利用できてもクラスのプロパティ名に利用できないケースがあるため。
 		$this->assertArrayHasKey('a', $data);
 		$this->assertArrayHasKey('b', $data);
 		$this->assertArrayHasKey('c', $data);
@@ -66,27 +77,21 @@ class JsonSerializerTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals('C', $data['c']);
 	}
 
-	public function testJsonSerializeDateTime()
+	public function testJsonSerializeJsonSerializable()
 	{
-		$now = new \DateTime();
-		$serializer = new JsonSerializer($now);
+		$serializer = new JsonSerializer(new JsonSerializer(['a' => 'A', 'b' => 'B', 'c' => 'C']));
 		$data = $serializer->jsonSerialize();
-		$this->assertEquals($now->format(\DateTime::RFC3339), $data);
+		// JsonSerializable は JsonSerializable::jsonSerialize() 実行結果に変換される。
+		// この場合は JsonSerializer::jsonSerialize() により内包する配列が返される。
+		$this->assertArrayHasKey('a', $data);
+		$this->assertArrayHasKey('b', $data);
+		$this->assertArrayHasKey('c', $data);
+		$this->assertEquals('A', $data['a']);
+		$this->assertEquals('B', $data['b']);
+		$this->assertEquals('C', $data['c']);
 	}
 
-	public function testJsonSerializeTraversable()
-	{
-		$serializer = new JsonSerializer(new \ArrayIterator(['a' => 'A', 'b' => 'B', 'c' => 'C']));
-		$data = $serializer->jsonSerialize();
-		$this->assertObjectHasAttribute('a', $data);
-		$this->assertObjectHasAttribute('b', $data);
-		$this->assertObjectHasAttribute('c', $data);
-		$this->assertEquals('A', $data->a);
-		$this->assertEquals('B', $data->b);
-		$this->assertEquals('C', $data->c);
-	}
-
-	public function testJsonSerializeNestedTraversable()
+	public function testJsonSerializeNestedTraversableToArray()
 	{
 		$now = new \DateTime();
 		$serializer = new JsonSerializer(new \ArrayIterator([
@@ -102,9 +107,9 @@ class JsonSerializerTest extends \PHPUnit_Framework_TestCase
 			]),
 		]));
 		$data = $serializer->jsonSerialize();
-		$this->assertEquals($data->now, $data->traversable->now);
-		$this->assertEquals($data->now, $data->traversable->traversable->now);
-		$this->assertEquals($data->now, $data->traversable->traversable->traversable->now);
+		$this->assertEquals($data['now'], $data['traversable']['now']);
+		$this->assertEquals($data['now'], $data['traversable']['traversable']['now']);
+		$this->assertEquals($data['now'], $data['traversable']['traversable']['traversable']['now']);
 	}
 
 	public function testJsonSerializeStdClass()
@@ -138,12 +143,12 @@ class JsonSerializerTest extends \PHPUnit_Framework_TestCase
 		$iterator = new \ArrayIterator(['a' => 'A', 'b' => 'B', 'c' => 'C']);
 		$serializer = new JsonSerializer();
 		$data = $serializer($iterator);
-		$this->assertObjectHasAttribute('a', $data);
-		$this->assertObjectHasAttribute('b', $data);
-		$this->assertObjectHasAttribute('c', $data);
-		$this->assertEquals('A', $data->a);
-		$this->assertEquals('B', $data->b);
-		$this->assertEquals('C', $data->c);
+		$this->assertArrayHasKey('a', $data);
+		$this->assertArrayHasKey('b', $data);
+		$this->assertArrayHasKey('c', $data);
+		$this->assertEquals('A', $data['a']);
+		$this->assertEquals('B', $data['b']);
+		$this->assertEquals('C', $data['c']);
 	}
 
 	public function testEncodeAndDecode()

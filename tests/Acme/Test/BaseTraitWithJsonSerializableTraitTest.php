@@ -93,7 +93,7 @@ class BaseTraitWithJsonSerializableTraitTest extends \PHPUnit_Framework_TestCase
 			]),
 		]);
 		$object = $data->jsonSerialize();
-		$this->assertEquals($object->datetime, $object->traversable->datetime);
+		$this->assertEquals($object->datetime, $object->traversable['datetime']);
 	}
 
 }
