@@ -21,14 +21,10 @@ trait ImmutableTrait
 	 *
 	 * @param mixed
 	 * @param mixed
+	 * @throws \LogicException
 	 */
 	final public function __set($name, $value)
 	{
-		if (!property_exists($this, $name)) {
-			throw new \InvalidArgumentException(
-				sprintf('The property "%s" does not exists.', $name)
-			);
-		}
 		throw new \LogicException(
 			sprintf('The property "%s" could not set.', $name)
 		);
@@ -38,14 +34,10 @@ trait ImmutableTrait
 	 * __unset
 	 *
 	 * @param mixed
+	 * @throws \LogicException
 	 */
 	final public function __unset($name)
 	{
-		if (!property_exists($this, $name)) {
-			throw new \InvalidArgumentException(
-				sprintf('The property "%s" does not exists.', $name)
-			);
-		}
 		throw new \LogicException(
 			sprintf('The property "%s" could not unset.', $name)
 		);
@@ -56,6 +48,7 @@ trait ImmutableTrait
 	 *
 	 * @param array プロパティの配列
 	 * @return self
+	 * @throws \InvalidArgumentException
 	 */
 	final private function initialize(array $properties = array())
 	{

@@ -79,15 +79,6 @@ class BaseTraitWithImmutableTraitTest extends \PHPUnit_Framework_TestCase
 	}
 
 	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testSetRaiseInvalidArgumentExceptionUndefinedProperty()
-	{
-		$test = new BaseTraitWithImmutableTraitTestData();
-		$test->undefined_property = 'Foo';
-	}
-
-	/**
 	 * @expectedException \LogicException
 	 */
 	public function testUnsetRaiseLogicException()
@@ -96,15 +87,6 @@ class BaseTraitWithImmutableTraitTest extends \PHPUnit_Framework_TestCase
 			'string' => 'Foo',
 		]);
 		unset($test->string);
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testUnsetRaiseInvalidArgumentExceptionUndefinedProperty()
-	{
-		$test = new BaseTraitWithImmutableTraitTestData();
-		unset($test->undefined_property);
 	}
 
 }
