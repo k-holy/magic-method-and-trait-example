@@ -6,7 +6,7 @@
  * @license The MIT License (MIT)
  */
 
-namespace Acme;
+namespace Acme\Test;
 
 use Acme\JsonSerializer;
 

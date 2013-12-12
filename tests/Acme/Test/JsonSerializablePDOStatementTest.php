@@ -23,7 +23,7 @@ class JsonSerializablePDOStatementTest extends \PHPUnit_Framework_TestCase
 	{
 		$pdo = new \PDO('sqlite::memory:', null, null, [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-			\PDO::ATTR_STATEMENT_CLASS => ['\Acme\JsonSerializablePDOStatement'],
+			\PDO::ATTR_STATEMENT_CLASS => ['\Acme\Test\JsonSerializablePDOStatement'],
 		]);
 
 		$pdo->exec('DROP TABLE IF EXISTS users;');
