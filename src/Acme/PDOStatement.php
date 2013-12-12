@@ -16,7 +16,7 @@ use Acme\JsonSerializer;
  *
  * @author k.holy74@gmail.com
  */
-class PDOStatement implements \IteratorAggregate, \JsonSerializable
+class PDOStatement implements \IteratorAggregate
 {
 
 	/**
@@ -38,6 +38,22 @@ class PDOStatement implements \IteratorAggregate, \JsonSerializable
 	{
 		$this->statement = $statement;
 		$this->callback = null;
+	}
+
+	/**
+	 * __call
+	 *
+	 * @param string
+	 * @param array
+	 */
+	public function __call($name, $args)
+	{
+		if (method_exists($this->statement, $name)) {
+			return call_user_func_array(array($this->statement, $name), $args);
+		}
+		throw new \BadMethodCallException(
+			sprintf('Undefined Method "%s" called.', $name)
+		);
 	}
 
 	/**
@@ -125,38 +141,6 @@ class PDOStatement implements \IteratorAggregate, \JsonSerializable
 		return (isset($this->callback))
 			? new CallbackIterator($this->statement, $this->callback)
 			: new \IteratorIterator($this->statement);
-	}
-
-	/**
-	 * JsonSerializable::jsonSerialize()
-	 *
-	 * @return array
-	 */
-	public function jsonSerialize()
-	{
-		$values = [];
-		$jsonSerializer = new JsonSerializer();
-		foreach ($this->getIterator() as $i => $item) {
-			$values[$i] = $jsonSerializer($item);
-		}
-
-		return $values;
-	}
-
-	/**
-	 * __call
-	 *
-	 * @param string
-	 * @param array
-	 */
-	public function __call($name, $args)
-	{
-		if (method_exists($this->statement, $name)) {
-			return call_user_func_array(array($this->statement, $name), $args);
-		}
-		throw new \BadMethodCallException(
-			sprintf('Undefined Method "%s" called.', $name)
-		);
 	}
 
 }

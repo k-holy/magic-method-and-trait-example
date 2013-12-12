@@ -43,7 +43,9 @@ trait UserTrait
 	 */
 	public function getCreatedAt()
 	{
-		$createdAt = new \DateTime(sprintf('@%d', $this->createdAt));
+		$createdAt = ($this->createdAt instanceof \DateTime)
+			? $this->createdAt
+			: new \DateTime(sprintf('@%d', $this->createdAt));
 		if (isset($this->timezone)) {
 			$createdAt->setTimezone($this->timezone);
 		}

@@ -11,6 +11,7 @@ namespace Acme\Test;
 use Acme\PDOStatement;
 use Acme\Domain\Data\ImmutableUser;
 use Acme\Domain\Data\MutableUser;
+use Acme\JsonSerializer;
 
 /**
  * Test for PDOStatement
@@ -43,6 +44,55 @@ SQL
 		$pdo->commit();
 
 		return $pdo;
+	}
+
+	public function testCallPdoStatementMethod()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
+
+		$statement->execute();
+
+		$user = $statement->fetchObject();
+		$this->assertEquals('1', $user->user_id);
+		$this->assertEquals('test1', $user->user_name);
+		$this->assertEquals($now->getTimestamp(), $user->created_at);
+	}
+
+	public function testCallPdoStatementMethodWithArguments()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
+
+		$statement->execute();
+
+		$user = $statement->fetchObject('\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
+		$this->assertEquals('1', $user->userId);
+		$this->assertEquals('test1', $user->userName);
+		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+	}
+
+	/**
+	 * @expectedException \BadMethodCallException
+	 */
+	public function testRaiseExceptionWhenUndefinedMethodIsCalled()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
+
+		$statement->undefinedMethod();
 	}
 
 	public function testExecuteParamInt()
@@ -134,7 +184,7 @@ SQL
 		$statement->setFetchMode(\PDO::FETCH_INTO, new MutableUser(null, $timezone, 'Y-m-d H:i:s'));
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(\PDO::FETCH_INTO);
+		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
 		$this->assertEquals('1', $user->userId);
@@ -157,7 +207,7 @@ SQL
 		$statement->setFetchMode(\PDO::FETCH_INTO, new ImmutableUser(null, $timezone, 'Y-m-d H:i:s'));
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(\PDO::FETCH_INTO);
+		$user = $statement->fetch();
 	}
 
 	public function testFetchClassMutableObject()
@@ -169,12 +219,13 @@ SQL
 
 		// PDO::FETCH_CLASS でのオブジェクト生成は、列と同名のプロパティに可視性に関わらず値をセットし、その後でフェッチモード指定時の引数でコンストラクタが呼ばれる。
 		// コンストラクタが呼ばれた時点ではすでにプロパティに値がセットされた状態となり、__set() が呼ばれることはない。
+		// PDO::FETCH_PROPS_LATE を合わせて指定すると動作が変更され、コンストラクタが呼ばれた後でプロパティに値がセットされるようになるが、やはり __set() が呼ばれることはない。
 		// そのため、__set() での値のバリデーションや変換は機能しない。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
-		$statement->setFetchMode(\PDO::FETCH_CLASS, '\Acme\Domain\Data\MutableUser', [null, $timezone, 'Y-m-d H:i:s']);
+		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Domain\Data\MutableUser', [null, $timezone, 'Y-m-d H:i:s']);
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(\PDO::FETCH_CLASS);
+		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
 		$this->assertEquals('1', $user->userId);
@@ -189,11 +240,12 @@ SQL
 
 		$pdo = $this->createRecord($now);
 
+		// PDO::FETCH_CLASS + PDO::FETCH_PROPS_LATE の場合、ImmutableTrait::__set() は呼ばれないため LogicException はスローされない。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
-		$statement->setFetchMode(\PDO::FETCH_CLASS, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
+		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(\PDO::FETCH_CLASS);
+		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
 		$this->assertEquals('1', $user->userId);
@@ -211,11 +263,11 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :userId"));
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_ASSOC);
-		$statement->setFetchCallback(function($item) use ($timezone) {
+		$statement->setFetchCallback(function($cols) use ($timezone) {
 			$user = new MutableUser();
-			$user->userId     = $item['user_id'];
-			$user->userName   = $item['user_name'];
-			$user->createdAt  = $item['created_at'];
+			$user->userId     = (int)$cols['user_id'];
+			$user->userName   = $cols['user_name'];
+			$user->createdAt  = new \DateTime(sprintf('@%d', $cols['created_at']));
 			$user->timezone   = $timezone;
 			$user->dateFormat = 'Y-m-d H:i:s';
 			return $user;
@@ -225,7 +277,7 @@ SQL
 		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
-		$this->assertEquals('1', $user->userId);
+		$this->assertEquals(1, $user->userId);
 		$this->assertEquals('test1', $user->userName);
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 	}
@@ -240,24 +292,23 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :userId"));
 		$statement->setFetchMode(\PDO::FETCH_ASSOC);
-		$statement->setFetchCallback(function($item) use ($timezone) {
-			$user = new ImmutableUser(
+		$statement->setFetchCallback(function($cols) use ($timezone) {
+			return new ImmutableUser(
 				[
-					'userId'    => $item['user_id'],
-					'userName'  => $item['user_name'],
-					'createdAt' => $item['created_at'],
+					'userId'    => (int)$cols['user_id'],
+					'userName'  => $cols['user_name'],
+					'createdAt' => new \DateTime(sprintf('@%d', $cols['created_at'])),
 				],
 				$timezone,
 				'Y-m-d H:i:s'
 			);
-			return $user;
 		});
 
 		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
-		$this->assertEquals('1', $user->userId);
+		$this->assertEquals(1, $user->userId);
 		$this->assertEquals('test1', $user->userName);
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 	}
@@ -272,17 +323,16 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users"));
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_ASSOC);
-		$statement->setFetchCallback(function($item) use ($timezone) {
-			$user = new ImmutableUser(
+		$statement->setFetchCallback(function($cols) use ($timezone) {
+			return new ImmutableUser(
 				[
-					'userId'    => $item['user_id'],
-					'userName'  => $item['user_name'],
-					'createdAt' => $item['created_at'],
+					'userId'    => (int)$cols['user_id'],
+					'userName'  => $cols['user_name'],
+					'createdAt' => new \DateTime(sprintf('@%d', $cols['created_at'])),
 				],
 				$timezone,
 				'Y-m-d H:i:s'
 			);
-			return $user;
 		});
 		$statement->execute();
 
@@ -290,10 +340,10 @@ SQL
 			$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
 			$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 			switch ($user->userId) {
-			case '1':
+			case 1:
 				$this->assertEquals('test1', $user->userName);
 				break;
-			case '2':
+			case 2:
 				$this->assertEquals('test2', $user->userName);
 				break;
 			}
@@ -309,7 +359,7 @@ SQL
 		$pdo = $this->createRecord($now);
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :userId"));
-		$statement->setFetchCallback(function($item) use ($timezone) {
+		$statement->setFetchCallback(function($cols) use ($timezone) {
 			return true;
 		});
 
@@ -328,7 +378,9 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_ASSOC);
-		$records = $statement->jsonSerialize();
+
+		$serializer = new JsonSerializer($statement);
+		$records = $serializer->jsonSerialize();
 
 		$this->assertEquals('1', $records[0]['user_id']);
 		$this->assertEquals('test1', $records[0]['user_name']);
@@ -349,7 +401,9 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_NUM);
-		$records = $statement->jsonSerialize();
+
+		$serializer = new JsonSerializer($statement);
+		$records = $serializer->jsonSerialize();
 
 		$this->assertEquals('1', $records[0][0]);
 		$this->assertEquals('test1', $records[0][1]);
@@ -370,7 +424,9 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_OBJ);
-		$records = $statement->jsonSerialize();
+
+		$serializer = new JsonSerializer($statement);
+		$records = $serializer->jsonSerialize();
 
 		$this->assertEquals('1', $records[0]->userId);
 		$this->assertEquals('test1', $records[0]->userName);
@@ -391,7 +447,9 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_CLASS, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, \DateTime::RFC3339]);
-		$records = $statement->jsonSerialize();
+
+		$serializer = new JsonSerializer($statement);
+		$records = $serializer->jsonSerialize();
 
 		$this->assertInstanceOf('\stdClass', $records[0]);
 		$this->assertEquals('1', $records[0]->userId);
@@ -414,7 +472,9 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_INTO, new MutableUser(null, $timezone, \DateTime::RFC3339));
-		$records = $statement->jsonSerialize();
+
+		$serializer = new JsonSerializer($statement);
+		$records = $serializer->jsonSerialize();
 
 		$this->assertInstanceOf('\stdClass', $records[0]);
 		$this->assertEquals('1', $records[0]->userId);
@@ -441,7 +501,9 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_INTO, new ImmutableUser(null, $timezone, \DateTime::RFC3339));
-		$records = $statement->jsonSerialize();
+
+		$serializer = new JsonSerializer($statement);
+		$records = $serializer->jsonSerialize();
 	}
 
 	public function testJsonSerializeByFetchCallback()
@@ -454,78 +516,30 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_ASSOC);
-		$statement->setFetchCallback(function($item) use ($timezone) {
-			$user = new ImmutableUser(
+		$statement->setFetchCallback(function($cols) use ($timezone) {
+			return new ImmutableUser(
 				[
-					'userId'    => $item['user_id'],
-					'userName'  => $item['user_name'],
-					'createdAt' => $item['created_at'],
+					'userId'    => (int)$cols['user_id'],
+					'userName'  => $cols['user_name'],
+					'createdAt' => new \DateTime(sprintf('@%d', $cols['created_at'])),
 				],
 				$timezone,
 				\DateTime::RFC3339
 			);
-			return $user;
 		});
-		$records = $statement->jsonSerialize();
+
+		$serializer = new JsonSerializer($statement);
+		$records = $serializer->jsonSerialize();
 
 		$this->assertInstanceOf('\stdClass', $records[0]);
-		$this->assertEquals('1', $records[0]->userId);
+		$this->assertEquals(1, $records[0]->userId);
 		$this->assertEquals('test1', $records[0]->userName);
 		$this->assertEquals($now->format(\DateTime::RFC3339), $records[0]->createdAt);
 
 		$this->assertInstanceOf('\stdClass', $records[1]);
-		$this->assertEquals('2', $records[1]->userId);
+		$this->assertEquals(2, $records[1]->userId);
 		$this->assertEquals('test2', $records[1]->userName);
 		$this->assertEquals($now->format(\DateTime::RFC3339), $records[1]->createdAt);
-	}
-
-	public function testCallPdoStatementMethod()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
-
-		$statement->execute();
-
-		$user = $statement->fetchObject();
-		$this->assertEquals('1', $user->user_id);
-		$this->assertEquals('test1', $user->user_name);
-		$this->assertEquals($now->getTimestamp(), $user->created_at);
-	}
-
-	public function testCallPdoStatementMethodWithArguments()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
-
-		$statement->execute();
-
-		$user = $statement->fetchObject('\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
-		$this->assertEquals('1', $user->userId);
-		$this->assertEquals('test1', $user->userName);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
-	}
-
-	/**
-	 * @expectedException \BadMethodCallException
-	 */
-	public function testRaiseExceptionWhenUndefinedMethodIsCalled()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
-
-		$statement->undefinedMethod();
 	}
 
 }
