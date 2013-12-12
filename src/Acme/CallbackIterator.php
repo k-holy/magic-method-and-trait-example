@@ -17,7 +17,7 @@ class CallbackIterator extends \IteratorIterator
 {
 
 	/**
-	 * @var Closure 要素を返す際に実行するコールバック関数
+	 * @var callable 要素を返す際に実行するコールバック関数
 	 */
 	private $callback;
 
@@ -25,9 +25,9 @@ class CallbackIterator extends \IteratorIterator
 	 * コンストラクタ
 	 *
 	 * @param Traversable
-	 * @param Closure 要素を返す際に実行するコールバック関数
+	 * @param callable 要素を返す際に実行するコールバック関数
 	 */
-	public function __construct(\Traversable $iterator, \Closure $callback)
+	public function __construct(\Traversable $iterator, callable $callback)
 	{
 		$this->callback = $callback;
 		parent::__construct($iterator);

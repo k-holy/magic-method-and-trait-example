@@ -19,28 +19,13 @@ use Acme\JsonSerializer;
 class PDOStatement implements \IteratorAggregate, \JsonSerializable
 {
 
-	const FETCH_ASSOC   = 'assoc';
-	const FETCH_NUM     = 'num';
-	const FETCH_INTO    = 'into';
-	const FETCH_CLASS   = 'class';
-	const FETCH_CLOSURE = 'closure';
-
 	/**
 	 * @var PDOStatement
 	 */
 	private $statement;
 
 	/**
-	 * @var string フェッチモード [FETCH_ASSOC | FETCH_NUM | FETCH_INTO | FETCH_CLASS | FETCH_CLOSURE]
-	 *
-	 * このクラスでは複数のモードを組み合わせた指定を許可しません。
-	 * FETCH_ASSOC, FETCH_NUM, FETCH_INTO, FETCH_CLASS は標準の \PDO::FETCH_** と同じ動作を行います。
-	 * FETCH_CLOSURE のみ特殊なモードで、フェッチした結果を引数として指定のクロージャを実行し、その結果を返します。
-	 */
-	private $fetchMode;
-
-	/**
-	 * @var Closure フェッチモードが FETCH_CLOSURE の場合に実行する関数
+	 * @param callable フェッチ後に実行するコールバック
 	 */
 	private $callback;
 
@@ -52,8 +37,17 @@ class PDOStatement implements \IteratorAggregate, \JsonSerializable
 	public function __construct(\PDOStatement $statement)
 	{
 		$this->statement = $statement;
-		$this->fetchMode = null;
 		$this->callback = null;
+	}
+
+	/**
+	 * フェッチ後に実行するコールバックをセットします。
+	 *
+	 * @param callable コールバック
+	 */
+	public function setFetchCallback(callable $callback)
+	{
+		$this->callback = $callback;
 	}
 
 	/**
@@ -106,99 +100,19 @@ class PDOStatement implements \IteratorAggregate, \JsonSerializable
 	}
 
 	/**
-	 * このステートメントのデフォルトのフェッチモードを設定します。
-	 *
-	 * @param int フェッチモード定数
-	 * @param mixed フェッチモードのオプション引数
-	 * @param array FETCH_CLASS の場合のコンストラクタ引数の配列
-	 * @return self
-	 * @throws \InvalidArgumentException
-	 */
-	public function setFetchMode($mode, $option = null, array $arguments = array())
-	{
-		switch ($mode) {
-		case self::FETCH_ASSOC:
-			$this->fetchMode = $mode;
-			$this->statement->setFetchMode(\PDO::FETCH_ASSOC);
-			break;
-		case self::FETCH_NUM:
-			$this->fetchMode = $mode;
-			$this->statement->setFetchMode(\PDO::FETCH_NUM);
-			break;
-		case self::FETCH_INTO:
-			$this->fetchMode = $mode;
-			$this->statement->setFetchMode(\PDO::FETCH_INTO, $option);
-			break;
-		case self::FETCH_CLASS:
-			$this->fetchMode = $mode;
-			if (!class_exists($option, true)) {
-				throw new \InvalidArgumentException(
-					sprintf('PDOStatement::FETCH_CLASS accepts only className, unknown className:%s',
-						$option
-					)
-				);
-			}
-			$this->statement->setFetchMode(\PDO::FETCH_CLASS, $option, $arguments);
-			break;
-		case self::FETCH_CLOSURE:
-			$this->fetchMode = $mode;
-			if (false === ($option instanceof \Closure)) {
-				throw new \InvalidArgumentException(
-					sprintf('PDOStatement::FETCH_CLOSURE accepts only Closure, invalid type:%s',
-						(is_object($option))
-							? get_class($option)
-							: gettype($option)
-					)
-				);
-			}
-			$this->callback = $option;
-			break;
-		default:
-			throw new \InvalidArgumentException(
-				sprintf('Unsupported fetchMode:%s', $mode)
-			);
-			break;
-		}
-
-		return $this;
-	}
-
-	/**
 	 * 結果セットから次の行を取得して返します。
 	 *
 	 * @param int フェッチモード定数
 	 * @return mixed
 	 * @throws \InvalidArgumentException
 	 */
-	public function fetch($mode = null)
+	public function fetch($how = null, $orientation = null, $offset = null)
 	{
-		if ($mode === null) {
-			$mode = $this->fetchMode;
+		$result = $this->statement->fetch($how, $orientation, $offset);
+		if (!isset($this->callback) || $result === false) {
+			return $result;
 		}
-		if ($mode === null) {
-			return $this->statement->fetch();
-		}
-
-		switch ($mode) {
-		case self::FETCH_ASSOC:
-			return $this->statement->fetch(\PDO::FETCH_ASSOC);
-		case self::FETCH_NUM:
-			return $this->statement->fetch(\PDO::FETCH_NUM);
-		case self::FETCH_INTO:
-			return $this->statement->fetch(\PDO::FETCH_INTO);
-		case self::FETCH_CLASS:
-			return $this->statement->fetch(\PDO::FETCH_CLASS);
-		case self::FETCH_CLOSURE:
-			$result = $this->statement->fetch();
-			if (!is_array($result)) {
-				return false;
-			}
-			return call_user_func($this->callback, $result);
-		}
-
-		throw new \InvalidArgumentException(
-			sprintf('Unsupported fetchMode:%s', $mode)
-		);
+		return call_user_func($this->callback, $result);
 	}
 
 	/**
@@ -208,7 +122,7 @@ class PDOStatement implements \IteratorAggregate, \JsonSerializable
 	 */
 	public function getIterator()
 	{
-		return ($this->fetchMode === self::FETCH_CLOSURE)
+		return (isset($this->callback))
 			? new CallbackIterator($this->statement, $this->callback)
 			: new \IteratorIterator($this->statement);
 	}

@@ -45,6 +45,40 @@ SQL
 		return $pdo;
 	}
 
+	public function testExecuteParamInt()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :user_id"));
+
+		$statement->execute(['user_id' => 1]);
+		$user = $statement->fetch(\PDO::FETCH_ASSOC);
+
+		$this->assertEquals('1', $user['user_id']);
+		$this->assertEquals('test1', $user['user_name']);
+		$this->assertEquals($now->getTimestamp(), $user['created_at']);
+	}
+
+	public function testExecuteParamStr()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_name = :user_name"));
+
+		$statement->execute(['user_name' => 'test2']);
+		$user = $statement->fetch(\PDO::FETCH_ASSOC);
+
+		$this->assertEquals('2', $user['user_id']);
+		$this->assertEquals('test2', $user['user_name']);
+		$this->assertEquals($now->getTimestamp(), $user['created_at']);
+	}
+
 	/**
 	 * @expectedException \InvalidArgumentException
 	 */
@@ -55,7 +89,7 @@ SQL
 
 		$pdo = $this->createRecord($now);
 
-		$statement = new PDOStatement($pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)"));
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :user_id"));
 		$statement->execute($now);
 	}
 
@@ -69,7 +103,7 @@ SQL
 
 		$pdo = $this->createRecord($now);
 
-		$statement = new PDOStatement($pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)"));
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :user_id"));
 		$statement->execute(false);
 	}
 
@@ -83,104 +117,8 @@ SQL
 
 		$pdo = $this->createRecord($now);
 
-		$statement = new PDOStatement($pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)"));
-		$statement->execute([':user_id' => 1]);
-	}
-
-	public function testSetFetchMode()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
-		$statement->setFetchMode(PDOStatement::FETCH_NUM);
-
-		$statement->execute();
-
-		$user = $statement->fetch();
-		$this->assertEquals('1', $user[0]);
-		$this->assertEquals('test1', $user[1]);
-		$this->assertEquals($now->getTimestamp(), $user[2]);
-
-		$user = $statement->fetch();
-		$this->assertEquals('2', $user[0]);
-		$this->assertEquals('test2', $user[1]);
-		$this->assertEquals($now->getTimestamp(), $user[2]);
-	}
-
-	public function testFetchByDefaultFetchMode()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-		$pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_NUM);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
-
-		$statement->execute();
-
-		$user = $statement->fetch();
-		$this->assertEquals('1', $user[0]);
-		$this->assertEquals('test1', $user[1]);
-		$this->assertEquals($now->getTimestamp(), $user[2]);
-
-		$user = $statement->fetch();
-		$this->assertEquals('2', $user[0]);
-		$this->assertEquals('test2', $user[1]);
-		$this->assertEquals($now->getTimestamp(), $user[2]);
-	}
-
-	public function testFetchAssocByIntegerParameter()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :user_id"));
-
-		$statement->execute(['user_id' => 1]);
-		$user = $statement->fetch(PDOStatement::FETCH_ASSOC);
-
-		$this->assertEquals('1', $user['user_id']);
-		$this->assertEquals('test1', $user['user_name']);
-		$this->assertEquals($now->getTimestamp(), $user['created_at']);
-	}
-
-	public function testFetchAssocByStringParameter()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_name = :user_name"));
-
-		$statement->execute(['user_name' => 'test2']);
-		$user = $statement->fetch(PDOStatement::FETCH_ASSOC);
-
-		$this->assertEquals('2', $user['user_id']);
-		$this->assertEquals('test2', $user['user_name']);
-		$this->assertEquals($now->getTimestamp(), $user['created_at']);
-	}
-
-	public function testFetchNum()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :user_id"));
-		$statement->execute(['user_id' => 1]);
-		$user = $statement->fetch(PDOStatement::FETCH_NUM);
-
-		$this->assertEquals('1', $user[0]);
-		$this->assertEquals('test1', $user[1]);
-		$this->assertEquals($now->getTimestamp(), $user[2]);
+		$statement->execute([':user_id' => 1]);
 	}
 
 	public function testFetchIntoMutableObject()
@@ -193,10 +131,10 @@ SQL
 		// PDO::FETCH_INTO でのオブジェクト生成は、フェッチモード指定時の引数でコンストラクタが呼ばれた後、列と同名のプロパティに値のセットを試みる。
 		// プロパティの可視性は有効となり、定義されている場合は __set() が呼ばれる。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
-		$statement->setFetchMode(PDOStatement::FETCH_INTO, new MutableUser(null, $timezone, 'Y-m-d H:i:s'));
+		$statement->setFetchMode(\PDO::FETCH_INTO, new MutableUser(null, $timezone, 'Y-m-d H:i:s'));
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(PDOStatement::FETCH_INTO);
+		$user = $statement->fetch(\PDO::FETCH_INTO);
 
 		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
 		$this->assertEquals('1', $user->userId);
@@ -216,10 +154,10 @@ SQL
 
 		// PDO::FETCH_INTO の場合、ImmutableTrait::__set() から LogicException がスローされる。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
-		$statement->setFetchMode(PDOStatement::FETCH_INTO, new ImmutableUser(null, $timezone, \DateTime::RFC3339));
+		$statement->setFetchMode(\PDO::FETCH_INTO, new ImmutableUser(null, $timezone, 'Y-m-d H:i:s'));
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(PDOStatement::FETCH_INTO);
+		$user = $statement->fetch(\PDO::FETCH_INTO);
 	}
 
 	public function testFetchClassMutableObject()
@@ -233,10 +171,10 @@ SQL
 		// コンストラクタが呼ばれた時点ではすでにプロパティに値がセットされた状態となり、__set() が呼ばれることはない。
 		// そのため、__set() での値のバリデーションや変換は機能しない。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
-		$statement->setFetchMode(PDOStatement::FETCH_CLASS, '\Acme\Domain\Data\MutableUser', [null, $timezone, 'Y-m-d H:i:s']);
+		$statement->setFetchMode(\PDO::FETCH_CLASS, '\Acme\Domain\Data\MutableUser', [null, $timezone, 'Y-m-d H:i:s']);
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(PDOStatement::FETCH_CLASS);
+		$user = $statement->fetch(\PDO::FETCH_CLASS);
 
 		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
 		$this->assertEquals('1', $user->userId);
@@ -252,10 +190,10 @@ SQL
 		$pdo = $this->createRecord($now);
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
-		$statement->setFetchMode(PDOStatement::FETCH_CLASS, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
+		$statement->setFetchMode(\PDO::FETCH_CLASS, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(PDOStatement::FETCH_CLASS);
+		$user = $statement->fetch(\PDO::FETCH_CLASS);
 
 		$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
 		$this->assertEquals('1', $user->userId);
@@ -263,18 +201,17 @@ SQL
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 	}
 
-	public function testFetchClosureMutableObject()
+	public function testFetchCallbackMutableObject()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
 		$now = new \DateTime('now', $timezone);
 
 		$pdo = $this->createRecord($now);
-		$pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 
-		// オリジナルのモード FETCH_CLOSURE では、元の PDOStatement に設定されたモードでフェッチした値をクロージャの引数として、クロージャの戻り値を返す。
-		// この例では ATTR_DEFAULT_FETCH_MODE として FETCH_ASSOC が設定済みのため、クロージャの引数には連想配列が渡される。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :userId"));
-		$statement->setFetchMode(PDOStatement::FETCH_CLOSURE, function($item) use ($timezone) {
+		$statement->execute();
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
+		$statement->setFetchCallback(function($item) use ($timezone) {
 			$user = new MutableUser();
 			$user->userId     = $item['user_id'];
 			$user->userName   = $item['user_name'];
@@ -285,7 +222,7 @@ SQL
 		});
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(PDOStatement::FETCH_CLOSURE);
+		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
 		$this->assertEquals('1', $user->userId);
@@ -293,7 +230,7 @@ SQL
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 	}
 
-	public function testFetchClosureImmutableObject()
+	public function testFetchCallbackImmutableObject()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
 		$now = new \DateTime('now', $timezone);
@@ -302,7 +239,8 @@ SQL
 		$pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :userId"));
-		$statement->setFetchMode(PDOStatement::FETCH_CLOSURE, function($item) use ($timezone) {
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
+		$statement->setFetchCallback(function($item) use ($timezone) {
 			$user = new ImmutableUser(
 				[
 					'userId'    => $item['user_id'],
@@ -316,7 +254,7 @@ SQL
 		});
 
 		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch(PDOStatement::FETCH_CLOSURE);
+		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
 		$this->assertEquals('1', $user->userId);
@@ -324,77 +262,60 @@ SQL
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 	}
 
-	public function testFetchClosureReturnedFalseWhenClosureReturnedFalse()
+	public function testFetchCallbackInIteration()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
 		$now = new \DateTime('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
-		$statement->setFetchMode(PDOStatement::FETCH_CLOSURE, function($item) {
-			return false;
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users"));
+		$statement->execute();
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
+		$statement->setFetchCallback(function($item) use ($timezone) {
+			$user = new ImmutableUser(
+				[
+					'userId'    => $item['user_id'],
+					'userName'  => $item['user_name'],
+					'createdAt' => $item['created_at'],
+				],
+				$timezone,
+				'Y-m-d H:i:s'
+			);
+			return $user;
+		});
+		$statement->execute();
+
+		foreach ($statement as $user) {
+			$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
+			$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+			switch ($user->userId) {
+			case '1':
+				$this->assertEquals('test1', $user->userName);
+				break;
+			case '2':
+				$this->assertEquals('test2', $user->userName);
+				break;
+			}
+		}
+
+	}
+
+	public function testFetchCallbackReturnedFalseWhenFetchReturnedFalse()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :userId"));
+		$statement->setFetchCallback(function($item) use ($timezone) {
+			return true;
 		});
 
-		$this->assertFalse($statement->fetch(PDOStatement::FETCH_CLOSURE));
-	}
+		$statement->execute(['userId' => 1000]);
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testSetFetchModeRaiseExceptionWhenFetchClassIsNotExists()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
-		$statement->setFetchMode(PDOStatement::FETCH_CLASS, 'Undefined\Class');
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testSetFetchModeRaiseExceptionWhenFetchClosureIsInvalidObject()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
-		$statement->setFetchMode(PDOStatement::FETCH_CLOSURE, $now);
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testSetFetchModeRaiseExceptionWhenUnsuportedFetchMode()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
-		$statement->setFetchMode('UnsupportedFetchMode');
-	}
-
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testFetchRaiseExceptionWhenUnsuportedFetchMode()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
-
-		$statement->execute();
-		$statement->fetch('UnsupportedFetchMode');
+		$this->assertFalse($statement->fetch());
 	}
 
 	public function testJsonSerializeByFetchAssoc()
@@ -406,7 +327,7 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
 		$statement->execute();
-		$statement->setFetchMode(PDOStatement::FETCH_ASSOC);
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
 		$records = $statement->jsonSerialize();
 
 		$this->assertEquals('1', $records[0]['user_id']);
@@ -427,7 +348,7 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
 		$statement->execute();
-		$statement->setFetchMode(PDOStatement::FETCH_NUM);
+		$statement->setFetchMode(\PDO::FETCH_NUM);
 		$records = $statement->jsonSerialize();
 
 		$this->assertEquals('1', $records[0][0]);
@@ -439,6 +360,27 @@ SQL
 		$this->assertEquals($now->getTimestamp(), $records[1][2]);
 	}
 
+	public function testJsonSerializeByFetchObject()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
+		$statement->execute();
+		$statement->setFetchMode(\PDO::FETCH_OBJ);
+		$records = $statement->jsonSerialize();
+
+		$this->assertEquals('1', $records[0]->userId);
+		$this->assertEquals('test1', $records[0]->userName);
+		$this->assertEquals($now->getTimestamp(), $records[0]->createdAt);
+
+		$this->assertEquals('2', $records[1]->userId);
+		$this->assertEquals('test2', $records[1]->userName);
+		$this->assertEquals($now->getTimestamp(), $records[1]->createdAt);
+	}
+
 	public function testJsonSerializeByFetchClass()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
@@ -448,7 +390,7 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
-		$statement->setFetchMode(PDOStatement::FETCH_CLASS, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, \DateTime::RFC3339]);
+		$statement->setFetchMode(\PDO::FETCH_CLASS, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, \DateTime::RFC3339]);
 		$records = $statement->jsonSerialize();
 
 		$this->assertInstanceOf('\stdClass', $records[0]);
@@ -471,7 +413,7 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
-		$statement->setFetchMode(PDOStatement::FETCH_INTO, new MutableUser(null, $timezone, \DateTime::RFC3339));
+		$statement->setFetchMode(\PDO::FETCH_INTO, new MutableUser(null, $timezone, \DateTime::RFC3339));
 		$records = $statement->jsonSerialize();
 
 		$this->assertInstanceOf('\stdClass', $records[0]);
@@ -498,11 +440,11 @@ SQL
 		// PDO::FETCH_INTO の場合、ImmutableTrait::__set() から LogicException がスローされる。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
-		$statement->setFetchMode(PDOStatement::FETCH_INTO, new ImmutableUser(null, $timezone, \DateTime::RFC3339));
+		$statement->setFetchMode(\PDO::FETCH_INTO, new ImmutableUser(null, $timezone, \DateTime::RFC3339));
 		$records = $statement->jsonSerialize();
 	}
 
-	public function testJsonSerializeByFetchClosure()
+	public function testJsonSerializeByFetchCallback()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
 		$now = new \DateTime('now', $timezone);
@@ -511,7 +453,8 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
 		$statement->execute();
-		$statement->setFetchMode(PDOStatement::FETCH_CLOSURE, function($item) use ($timezone) {
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
+		$statement->setFetchCallback(function($item) use ($timezone) {
 			$user = new ImmutableUser(
 				[
 					'userId'    => $item['user_id'],
