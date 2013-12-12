@@ -46,6 +46,34 @@ SQL
 	}
 
 	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testExecuteRaiseExceptionWhenParameterIsInvalidIbject()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)"));
+		$statement->execute($now);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testExecuteRaiseExceptionWhenParameterIsInvalidType()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)"));
+		$statement->execute(false);
+	}
+
+	/**
 	 * @expectedException \RuntimeException
 	 */
 	public function testExecuteRaiseExceptionWhenPDOExceptionIsThrown()
@@ -56,7 +84,7 @@ SQL
 		$pdo = $this->createRecord($now);
 
 		$statement = new PDOStatement($pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)"));
-		$statement->execute([':user_id' => '1']);
+		$statement->execute([':user_id' => 1]);
 	}
 
 	public function testFetchAssoc()
@@ -68,14 +96,14 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :user_id ORDER BY user_id"));
 
-		$statement->execute(['user_id' => '1']);
+		$statement->execute(['user_id' => 1]);
 		$user = $statement->fetch(PDOStatement::FETCH_ASSOC);
 
 		$this->assertEquals('1', $user['user_id']);
 		$this->assertEquals('test1', $user['user_name']);
 		$this->assertEquals($now->getTimestamp(), $user['created_at']);
 
-		$statement->execute(['user_id' => '2']);
+		$statement->execute(['user_id' => 2]);
 		$user = $statement->fetch(PDOStatement::FETCH_ASSOC);
 		$this->assertEquals('2', $user['user_id']);
 		$this->assertEquals('test2', $user['user_name']);
@@ -91,14 +119,14 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :user_id ORDER BY user_id"));
 
-		$statement->execute(['user_id' => '1']);
+		$statement->execute(['user_id' => 1]);
 		$user = $statement->fetch(PDOStatement::FETCH_NUM);
 
 		$this->assertEquals('1', $user[0]);
 		$this->assertEquals('test1', $user[1]);
 		$this->assertEquals($now->getTimestamp(), $user[2]);
 
-		$statement->execute(['user_id' => '2']);
+		$statement->execute(['user_id' => 2]);
 		$user = $statement->fetch(PDOStatement::FETCH_NUM);
 		$this->assertEquals('2', $user[0]);
 		$this->assertEquals('test2', $user[1]);
@@ -117,13 +145,13 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId ORDER BY user_id"));
 		$statement->setFetchMode(PDOStatement::FETCH_INTO, new MutableUser(null, $timezone, 'Y-m-d H:i:s'));
 
-		$statement->execute(['userId' => '1']);
+		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch(PDOStatement::FETCH_INTO);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 
-		$statement->execute(['userId' => '2']);
+		$statement->execute(['userId' => 2]);
 		$user = $statement->fetch(PDOStatement::FETCH_INTO);
 		$this->assertEquals('2', $user->userId);
 		$this->assertEquals('test2', $user->userName);
@@ -144,7 +172,7 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId ORDER BY user_id"));
 		$statement->setFetchMode(PDOStatement::FETCH_INTO, new ImmutableUser(null, $timezone, \DateTime::RFC3339));
 
-		$statement->execute(['userId' => '1']);
+		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch(PDOStatement::FETCH_INTO);
 	}
 
@@ -161,13 +189,13 @@ SQL
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId ORDER BY user_id"));
 		$statement->setFetchMode(PDOStatement::FETCH_CLASS, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
 
-		$statement->execute(['userId' => '1']);
+		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch(PDOStatement::FETCH_CLASS);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 
-		$statement->execute(['userId' => '2']);
+		$statement->execute(['userId' => 2]);
 		$user = $statement->fetch(PDOStatement::FETCH_CLASS);
 		$this->assertEquals('2', $user->userId);
 		$this->assertEquals('test2', $user->userName);
@@ -198,17 +226,101 @@ SQL
 			return $user;
 		});
 
-		$statement->execute(['userId' => '1']);
+		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch(PDOStatement::FETCH_CLOSURE);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
 
-		$statement->execute(['userId' => '2']);
+		$statement->execute(['userId' => 2]);
 		$user = $statement->fetch(PDOStatement::FETCH_CLOSURE);
 		$this->assertEquals('2', $user->userId);
 		$this->assertEquals('test2', $user->userName);
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+	}
+
+	public function testFetchClosureReturnedFalseWhenNoResults()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("DELETE FROM users"));
+		$statement->execute();
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :user_id ORDER BY user_id"));
+		$statement->setFetchMode(PDOStatement::FETCH_CLOSURE, function($item) use ($timezone) {
+			$user = new ImmutableUser(
+				[
+					'userId'    => $item['user_id'],
+					'userName'  => $item['user_name'],
+					'createdAt' => $item['created_at'],
+				],
+				$timezone,
+				'Y-m-d H:i:s'
+			);
+			return $user;
+		});
+		$this->assertFalse($statement->fetch(PDOStatement::FETCH_CLOSURE));
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testSetFetchModeRaiseExceptionWhenFetchClassIsNotExists()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
+		$statement->setFetchMode(PDOStatement::FETCH_CLASS, 'Undefined\Class');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testSetFetchModeRaiseExceptionWhenFetchClosureIsInvalidObject()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
+		$statement->setFetchMode(PDOStatement::FETCH_CLOSURE, $now);
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testSetFetchModeRaiseExceptionWhenUnsuportedFetchMode()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users ORDER BY user_id"));
+		$statement->setFetchMode('UnsupportedFetchMode');
+	}
+
+	/**
+	 * @expectedException \InvalidArgumentException
+	 */
+	public function testFetchRaiseExceptionWhenUnsuportedFetchMode()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTime('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :user_id ORDER BY user_id"));
+
+		$statement->execute(['user_id' => 1]);
+		$statement->fetch('UnsupportedFetchMode');
 	}
 
 	public function testJsonSerializeByFetchAssoc()
