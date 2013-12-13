@@ -23,14 +23,30 @@ trait UserTrait
 	 * @param \DateTimeZone タイムゾーン
 	 * @param string 日付の出力書式
 	 */
-	public function __construct(array $properties = null, \DateTimeZone $timezone = null, $dateFormat = null)
+	public function __construct(array $properties = null)
 	{
 		if (isset($properties)) {
 			$this->initialize($properties);
 		}
-		if (isset($timezone)) {
-			$this->timezone = $timezone;
-		}
+	}
+
+	/**
+	 * 日付の出力用タイムゾーンをセットします。
+	 *
+	 * @param \DateTimeZone
+	 */
+	private function setTimezone(\DateTimeZone $timezone)
+	{
+		$this->timezone = $timezone;
+	}
+
+	/**
+	 * 日付の出力用書式をセットします。
+	 *
+	 * @param \DateTimeZone
+	 */
+	private function setDateFormat($dateFormat)
+	{
 		$this->dateFormat = $dateFormat ?: 'Y-m-d H:i:s';
 	}
 

@@ -54,18 +54,12 @@ class User implements BaseInterface, \JsonSerializable
 	 * __construct()
 	 *
 	 * @param array プロパティの配列
-	 * @param \DateTimeZone タイムゾーン
-	 * @param string 日付の出力書式
 	 */
-	public function __construct(array $properties = null, \DateTimeZone $timezone = null, $dateFormat = null)
+	public function __construct(array $properties = null)
 	{
 		if (isset($properties)) {
 			$this->initialize($properties);
 		}
-		if (isset($timezone)) {
-			$this->timezone = $timezone;
-		}
-		$this->dateFormat = $dateFormat ?: 'Y-m-d H:i:s';
 	}
 
 	/**
@@ -73,9 +67,29 @@ class User implements BaseInterface, \JsonSerializable
 	 *
 	 * @param \DateTimeImmutable
 	 */
-	public function setCreatedAt(\DateTimeImmutable $createdAt)
+	private function setCreatedAt(\DateTimeImmutable $createdAt)
 	{
 		$this->createdAt = $createdAt;
+	}
+
+	/**
+	 * 日付の出力用タイムゾーンをセットします。
+	 *
+	 * @param \DateTimeZone
+	 */
+	private function setTimezone(\DateTimeZone $timezone)
+	{
+		$this->timezone = $timezone;
+	}
+
+	/**
+	 * 日付の出力用書式をセットします。
+	 *
+	 * @param \DateTimeZone
+	 */
+	private function setDateFormat($dateFormat)
+	{
+		$this->dateFormat = $dateFormat ?: 'Y-m-d H:i:s';
 	}
 
 	/**
