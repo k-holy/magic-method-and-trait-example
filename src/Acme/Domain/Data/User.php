@@ -8,22 +8,18 @@
 
 namespace Acme\Domain\Data;
 
-use Acme\BaseInterface;
-use Acme\BaseTrait;
-use Acme\ImmutableTrait;
+use Acme\Domain\Data\DataInterface;
+use Acme\Domain\Data\DataTrait;
 
 /**
  * User
  *
  * @author k.holy74@gmail.com
  */
-class User implements BaseInterface, \JsonSerializable
+class User implements DataInterface, \IteratorAggregate, \JsonSerializable
 {
-	use BaseTrait, ImmutableTrait {
-		ImmutableTrait::initialize insteadof BaseTrait;
-		ImmutableTrait::__set insteadof BaseTrait;
-		ImmutableTrait::__unset insteadof BaseTrait;
-	}
+
+	use DataTrait;
 
 	/**
 	 * @var int
@@ -49,18 +45,6 @@ class User implements BaseInterface, \JsonSerializable
 	 * @var string 日付の出力用書式
 	 */
 	private $dateFormat;
-
-	/**
-	 * __construct()
-	 *
-	 * @param array プロパティの配列
-	 */
-	public function __construct(array $properties = null)
-	{
-		if (isset($properties)) {
-			$this->initialize($properties);
-		}
-	}
 
 	/**
 	 * createdAtの値をセットします。
@@ -99,10 +83,9 @@ class User implements BaseInterface, \JsonSerializable
 	 */
 	public function getCreatedAt()
 	{
-		if (isset($this->timezone)) {
-			return $this->createdAt->setTimezone($this->timezone);
-		}
-		return $this->createdAt;
+		return (isset($this->timezone)) 
+			? $this->createdAt->setTimezone($this->timezone)
+			: $this->createdAt;
 	}
 
 	/**

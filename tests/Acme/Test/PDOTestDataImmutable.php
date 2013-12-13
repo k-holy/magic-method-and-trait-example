@@ -6,21 +6,25 @@
  * @license The MIT License (MIT)
  */
 
-namespace Acme\Domain\Data;
+namespace Acme\Test;
 
 use Acme\BaseInterface;
 use Acme\BaseTrait;
-use Acme\Domain\Data\UserTrait;
+use Acme\ImmutableTrait;
+use Acme\Test\PDOTestDataTrait;
 
 /**
- * MutableUser
+ * PDOTestDataImmutable
  *
  * @author k.holy74@gmail.com
  */
-class MutableUser implements BaseInterface, \JsonSerializable
+class PDOTestDataImmutable implements BaseInterface, \JsonSerializable
 {
-	use BaseTrait;
-	use UserTrait;
+	use BaseTrait, ImmutableTrait, PDOTestDataTrait {
+		ImmutableTrait::initialize insteadof BaseTrait;
+		ImmutableTrait::__set insteadof BaseTrait;
+		ImmutableTrait::__unset insteadof BaseTrait;
+	}
 
 	/**
 	 * @var string

@@ -9,7 +9,7 @@
 namespace Acme\Test;
 
 use Acme\PDO;
-use Acme\Domain\Data\MutableUser;
+use Acme\Test\PDOTestDataMutable;
 
 /**
  * Test for PDO
@@ -74,11 +74,11 @@ SQL
 		$statement = $pdo->query(
 			"SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id",
 			\PDO::FETCH_INTO,
-			new MutableUser(null, $timezone, 'Y-m-d H:i:s')
+			new PDOTestDataMutable(null, $timezone, 'Y-m-d H:i:s')
 		);
 		$user = $statement->fetch();
 
-		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
+		$this->assertInstanceOf('\Acme\Test\PDOTestDataMutable', $user);
 	}
 
 	public function testQueryWithSetFetchModeToFetchClass()
@@ -96,12 +96,12 @@ SQL
 		$statement = $pdo->query(
 			"SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id",
 			\PDO::FETCH_CLASS,
-			'\Acme\Domain\Data\ImmutableUser',
+			'\Acme\Test\PDOTestDataImmutable',
 			[null, $timezone, 'Y-m-d H:i:s']
 		);
 		$user = $statement->fetch();
 
-		$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
+		$this->assertInstanceOf('\Acme\Test\PDOTestDataImmutable', $user);
 	}
 
 	/**
@@ -114,7 +114,7 @@ SQL
 		$statement = $pdo->query(
 			"SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id",
 			\PDO::FETCH_CLASS,
-			'\Acme\Domain\Data\ImmutableUser',
+			'\Acme\Test\PDOTestDataImmutable',
 			[],
 			false
 		);

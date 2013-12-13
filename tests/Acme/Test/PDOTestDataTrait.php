@@ -6,14 +6,14 @@
  * @license The MIT License (MIT)
  */
 
-namespace Acme\Domain\Data;
+namespace Acme\Test;
 
 /**
- * UserTrait
+ * PDOTestDataTrait
  *
  * @author k.holy74@gmail.com
  */
-trait UserTrait
+trait PDOTestDataTrait
 {
 
 	/**

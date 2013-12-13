@@ -9,8 +9,8 @@
 namespace Acme\Test;
 
 use Acme\PDOStatement;
-use Acme\Domain\Data\ImmutableUser;
-use Acme\Domain\Data\MutableUser;
+use Acme\Test\PDOTestDataImmutable;
+use Acme\Test\PDOTestDataMutable;
 use Acme\Domain\Data\User;
 use Acme\JsonSerializer;
 
@@ -59,6 +59,7 @@ SQL
 		$statement->execute();
 
 		$user = $statement->fetchObject();
+
 		$this->assertEquals('1', $user->user_id);
 		$this->assertEquals('test1', $user->user_name);
 		$this->assertEquals($now->getTimestamp(), $user->created_at);
@@ -75,12 +76,29 @@ SQL
 
 		$statement->execute();
 
-		$user = $statement->fetchObject('\Acme\Domain\Data\ImmutableUser', [['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']]);
+		$user = $statement->fetchObject('\Acme\Test\PDOTestDataImmutable', [['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']]);
 
 		$this->assertNull($user->userId); // プロパティがセットされた後でコンストラクタが呼ばれるため、コンストラクタで指定したプロパティ以外はNULLになってしまう…
 		$this->assertNull($user->userName);
 		$this->assertEquals($timezone, $user->timezone);
 		$this->assertEquals('Y-m-d H:i:s', $user->dateFormat);
+	}
+
+	public function testFetchLazy()
+	{
+		$timezone = new \DateTimeZone('Asia/Tokyo');
+		$now = new \DateTimeImmutable('now', $timezone);
+
+		$pdo = $this->createRecord($now);
+
+		$statement = $pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :user_id");
+
+		$statement->execute(['user_id' => 1]);
+
+		$row = $statement->fetch(\PDO::FETCH_LAZY);
+
+		$this->assertInstanceOf('PDORow', $row);
+		$this->assertEquals($statement->queryString, $row->queryString);
 	}
 
 	/**
@@ -185,11 +203,11 @@ SQL
 		// プロパティの可視性は有効となり、定義されている場合は __set() が呼ばれる。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
 		$statement->execute(['userId' => 1]);
-		$statement->setFetchMode(\PDO::FETCH_INTO, new MutableUser(['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']));
+		$statement->setFetchMode(\PDO::FETCH_INTO, new PDOTestDataMutable(['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']));
 
 		$user = $statement->fetch();
 
-		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
+		$this->assertInstanceOf('\Acme\Test\PDOTestDataMutable', $user);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
 		$this->assertEquals($now, $user->createdAt);
@@ -209,7 +227,7 @@ SQL
 		// PDO::FETCH_INTO の場合、ImmutableTrait::__set() から LogicException がスローされる。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
 		$statement->execute(['userId' => 1]);
-		$statement->setFetchMode(\PDO::FETCH_INTO, new ImmutableUser(['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']));
+		$statement->setFetchMode(\PDO::FETCH_INTO, new PDOTestDataImmutable(['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']));
 
 		$user = $statement->fetch();
 	}
@@ -227,11 +245,11 @@ SQL
 		// そのため、__set() での値のバリデーションや変換は機能しない。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
 		$statement->execute(['userId' => 1]);
-		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Domain\Data\MutableUser', [['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']]);
+		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Test\PDOTestDataMutable', [['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']]);
 
 		$user = $statement->fetch();
 
-		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
+		$this->assertInstanceOf('\Acme\Test\PDOTestDataMutable', $user);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
 		$this->assertEquals($now, $user->createdAt);
@@ -248,11 +266,11 @@ SQL
 		// PDO::FETCH_CLASS + PDO::FETCH_PROPS_LATE の場合、ImmutableTrait::__set() は呼ばれないため LogicException はスローされない。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
 		$statement->execute(['userId' => 1]);
-		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Domain\Data\ImmutableUser', [['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']]);
+		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Test\PDOTestDataImmutable', [['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']]);
 
 		$user = $statement->fetch();
 
-		$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
+		$this->assertInstanceOf('\Acme\Test\PDOTestDataImmutable', $user);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
 		$this->assertEquals($now, $user->createdAt);
@@ -425,7 +443,7 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
-		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Domain\Data\ImmutableUser', [['timezone' => $timezone, 'dateFormat' => \DateTime::RFC3339]]);
+		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Test\PDOTestDataImmutable', [['timezone' => $timezone, 'dateFormat' => \DateTime::RFC3339]]);
 
 		$serializer = new JsonSerializer($statement);
 		$records = $serializer->jsonSerialize();
@@ -450,7 +468,7 @@ SQL
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
-		$statement->setFetchMode(\PDO::FETCH_INTO, new MutableUser(['timezone' => $timezone, 'dateFormat' => \DateTime::RFC3339]));
+		$statement->setFetchMode(\PDO::FETCH_INTO, new PDOTestDataMutable(['timezone' => $timezone, 'dateFormat' => \DateTime::RFC3339]));
 
 		$serializer = new JsonSerializer($statement);
 		$records = $serializer->jsonSerialize();
@@ -479,7 +497,7 @@ SQL
 		// PDO::FETCH_INTO の場合、ImmutableTrait::__set() から LogicException がスローされる。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
 		$statement->execute();
-		$statement->setFetchMode(\PDO::FETCH_INTO, new ImmutableUser(null, $timezone, \DateTime::RFC3339));
+		$statement->setFetchMode(\PDO::FETCH_INTO, new PDOTestDataImmutable(null, $timezone, \DateTime::RFC3339));
 
 		$serializer = new JsonSerializer($statement);
 		$records = $serializer->jsonSerialize();
