@@ -9,7 +9,6 @@
 namespace Acme;
 
 use Acme\CallbackIterator;
-use Acme\JsonSerializer;
 
 /**
  * PDOStatement

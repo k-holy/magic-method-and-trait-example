@@ -26,10 +26,29 @@ class ImmutableUser implements BaseInterface, \JsonSerializable
 		ImmutableTrait::__unset insteadof BaseTrait;
 	}
 
+	/**
+	 * @var string
+	 */
 	private $userId;
+
+	/**
+	 * @var string
+	 */
 	private $userName;
+
+	/**
+	 * @var string タイムスタンプ値
+	 */
 	private $createdAt;
+
+	/**
+	 * @var \DateTimeZone 日付の出力用タイムゾーン
+	 */
 	private $timezone;
+
+	/**
+	 * @var string 日付の出力用書式
+	 */
 	private $dateFormat;
 
 }

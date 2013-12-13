@@ -11,6 +11,7 @@ namespace Acme\Test;
 use Acme\PDOStatement;
 use Acme\Domain\Data\ImmutableUser;
 use Acme\Domain\Data\MutableUser;
+use Acme\Domain\Data\User;
 use Acme\JsonSerializer;
 
 /**
@@ -21,7 +22,7 @@ use Acme\JsonSerializer;
 class PDOStatementTest extends \PHPUnit_Framework_TestCase
 {
 
-	private function createRecord(\DateTime $now)
+	private function createRecord(\DateTimeImmutable $now)
 	{
 		$pdo = new \PDO('sqlite::memory:', null, null, [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
@@ -49,7 +50,7 @@ SQL
 	public function testCallPdoStatementMethod()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -66,7 +67,7 @@ SQL
 	public function testCallPdoStatementMethodWithArguments()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -77,7 +78,8 @@ SQL
 		$user = $statement->fetchObject('\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+		$this->assertEquals($now, $user->createdAt);
+		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAtAsString);
 	}
 
 	/**
@@ -86,7 +88,7 @@ SQL
 	public function testRaiseExceptionWhenUndefinedMethodIsCalled()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -98,7 +100,7 @@ SQL
 	public function testExecuteParamInt()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -115,7 +117,7 @@ SQL
 	public function testExecuteParamStr()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -135,7 +137,7 @@ SQL
 	public function testExecuteRaiseExceptionWhenParameterIsInvalidIbject()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -149,7 +151,7 @@ SQL
 	public function testExecuteRaiseExceptionWhenParameterIsInvalidType()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -163,7 +165,7 @@ SQL
 	public function testExecuteRaiseExceptionWhenPDOExceptionIsThrown()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -174,22 +176,23 @@ SQL
 	public function testFetchIntoMutableObject()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
 		// PDO::FETCH_INTO でのオブジェクト生成は、フェッチモード指定時の引数でコンストラクタが呼ばれた後、列と同名のプロパティに値のセットを試みる。
 		// プロパティの可視性は有効となり、定義されている場合は __set() が呼ばれる。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
+		$statement->execute(['userId' => 1]);
 		$statement->setFetchMode(\PDO::FETCH_INTO, new MutableUser(null, $timezone, 'Y-m-d H:i:s'));
 
-		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+		$this->assertEquals($now, $user->createdAt);
+		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAtAsString);
 	}
 
 	/**
@@ -198,22 +201,22 @@ SQL
 	public function testFetchIntoImmutableObjectRaiseLogicException()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
 		// PDO::FETCH_INTO の場合、ImmutableTrait::__set() から LogicException がスローされる。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
+		$statement->execute(['userId' => 1]);
 		$statement->setFetchMode(\PDO::FETCH_INTO, new ImmutableUser(null, $timezone, 'Y-m-d H:i:s'));
 
-		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch();
 	}
 
 	public function testFetchClassMutableObject()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -222,101 +225,75 @@ SQL
 		// PDO::FETCH_PROPS_LATE を合わせて指定すると動作が変更され、コンストラクタが呼ばれた後でプロパティに値がセットされるようになるが、やはり __set() が呼ばれることはない。
 		// そのため、__set() での値のバリデーションや変換は機能しない。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
+		$statement->execute(['userId' => 1]);
 		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Domain\Data\MutableUser', [null, $timezone, 'Y-m-d H:i:s']);
 
-		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+		$this->assertEquals($now, $user->createdAt);
+		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAtAsString);
 	}
 
 	public function testFetchClassImmutableObject()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
 		// PDO::FETCH_CLASS + PDO::FETCH_PROPS_LATE の場合、ImmutableTrait::__set() は呼ばれないため LogicException はスローされない。
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :userId"));
+		$statement->execute(['userId' => 1]);
 		$statement->setFetchMode(\PDO::FETCH_CLASS|\PDO::FETCH_PROPS_LATE, '\Acme\Domain\Data\ImmutableUser', [null, $timezone, 'Y-m-d H:i:s']);
 
-		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch();
 
 		$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
 		$this->assertEquals('1', $user->userId);
 		$this->assertEquals('test1', $user->userName);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+		$this->assertEquals($now, $user->createdAt);
+		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAtAsString);
 	}
 
-	public function testFetchCallbackMutableObject()
+	public function testFetchCallback()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :userId"));
-		$statement->execute();
-		$statement->setFetchMode(\PDO::FETCH_ASSOC);
-		$statement->setFetchCallback(function($cols) use ($timezone) {
-			$user = new MutableUser();
-			$user->userId     = (int)$cols['user_id'];
-			$user->userName   = $cols['user_name'];
-			$user->createdAt  = new \DateTime(sprintf('@%d', $cols['created_at']));
-			$user->timezone   = $timezone;
-			$user->dateFormat = 'Y-m-d H:i:s';
-			return $user;
-		});
-
-		$statement->execute(['userId' => 1]);
-		$user = $statement->fetch();
-
-		$this->assertInstanceOf('\Acme\Domain\Data\MutableUser', $user);
-		$this->assertEquals(1, $user->userId);
-		$this->assertEquals('test1', $user->userName);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
-	}
-
-	public function testFetchCallbackImmutableObject()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 		$pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
 
 		$statement = new PDOStatement($pdo->prepare("SELECT user_id, user_name, created_at FROM users WHERE user_id = :userId"));
+		$statement->execute(['userId' => 1]);
 		$statement->setFetchMode(\PDO::FETCH_ASSOC);
 		$statement->setFetchCallback(function($cols) use ($timezone) {
-			return new ImmutableUser(
+			return new User(
 				[
 					'userId'    => (int)$cols['user_id'],
 					'userName'  => $cols['user_name'],
-					'createdAt' => new \DateTime(sprintf('@%d', $cols['created_at'])),
+					'createdAt' => new \DateTimeImmutable(sprintf('@%d', $cols['created_at'])),
 				],
 				$timezone,
 				'Y-m-d H:i:s'
 			);
 		});
 
-		$statement->execute(['userId' => 1]);
 		$user = $statement->fetch();
 
-		$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
+		$this->assertInstanceOf('\Acme\Domain\Data\User', $user);
 		$this->assertEquals(1, $user->userId);
 		$this->assertEquals('test1', $user->userName);
-		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+		$this->assertEquals($now, $user->createdAt);
+		$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAtAsString);
 	}
 
 	public function testFetchCallbackInIteration()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -324,11 +301,11 @@ SQL
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_ASSOC);
 		$statement->setFetchCallback(function($cols) use ($timezone) {
-			return new ImmutableUser(
+			return new User(
 				[
 					'userId'    => (int)$cols['user_id'],
 					'userName'  => $cols['user_name'],
-					'createdAt' => new \DateTime(sprintf('@%d', $cols['created_at'])),
+					'createdAt' => new \DateTimeImmutable(sprintf('@%d', $cols['created_at'])),
 				],
 				$timezone,
 				'Y-m-d H:i:s'
@@ -337,8 +314,9 @@ SQL
 		$statement->execute();
 
 		foreach ($statement as $user) {
-			$this->assertInstanceOf('\Acme\Domain\Data\ImmutableUser', $user);
-			$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAt);
+			$this->assertInstanceOf('\Acme\Domain\Data\User', $user);
+			$this->assertEquals($now, $user->createdAt);
+			$this->assertEquals($now->format('Y-m-d H:i:s'), $user->createdAtAsString);
 			switch ($user->userId) {
 			case 1:
 				$this->assertEquals('test1', $user->userName);
@@ -354,7 +332,7 @@ SQL
 	public function testFetchCallbackReturnedFalseWhenFetchReturnedFalse()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -371,7 +349,7 @@ SQL
 	public function testJsonSerializeByFetchAssoc()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -394,7 +372,7 @@ SQL
 	public function testJsonSerializeByFetchNum()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -417,7 +395,7 @@ SQL
 	public function testJsonSerializeByFetchObject()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -440,7 +418,7 @@ SQL
 	public function testJsonSerializeByFetchClass()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -465,7 +443,7 @@ SQL
 	public function testJsonSerializeByFetchInto()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -493,7 +471,7 @@ SQL
 	public function testJsonSerializeByFetchIntoRaiseLogicExceptionWhenObjectIsImmutable()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -509,7 +487,7 @@ SQL
 	public function testJsonSerializeByFetchCallback()
 	{
 		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTime('now', $timezone);
+		$now = new \DateTimeImmutable('now', $timezone);
 
 		$pdo = $this->createRecord($now);
 
@@ -517,11 +495,11 @@ SQL
 		$statement->execute();
 		$statement->setFetchMode(\PDO::FETCH_ASSOC);
 		$statement->setFetchCallback(function($cols) use ($timezone) {
-			return new ImmutableUser(
+			return new User(
 				[
 					'userId'    => (int)$cols['user_id'],
 					'userName'  => $cols['user_name'],
-					'createdAt' => new \DateTime(sprintf('@%d', $cols['created_at'])),
+					'createdAt' => new \DateTimeImmutable(sprintf('@%d', $cols['created_at'])),
 				],
 				$timezone,
 				\DateTime::RFC3339

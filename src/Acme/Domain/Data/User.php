@@ -8,13 +8,47 @@
 
 namespace Acme\Domain\Data;
 
+use Acme\BaseInterface;
+use Acme\BaseTrait;
+use Acme\ImmutableTrait;
+
 /**
- * UserTrait
+ * User
  *
  * @author k.holy74@gmail.com
  */
-trait UserTrait
+class User implements BaseInterface, \JsonSerializable
 {
+	use BaseTrait, ImmutableTrait {
+		ImmutableTrait::initialize insteadof BaseTrait;
+		ImmutableTrait::__set insteadof BaseTrait;
+		ImmutableTrait::__unset insteadof BaseTrait;
+	}
+
+	/**
+	 * @var int
+	 */
+	private $userId;
+
+	/**
+	 * @var string
+	 */
+	private $userName;
+
+	/**
+	 * @var \DateTimeImmutable
+	 */
+	private $createdAt;
+
+	/**
+	 * @var \DateTimeZone 日付の出力用タイムゾーン
+	 */
+	private $timezone;
+
+	/**
+	 * @var string 日付の出力用書式
+	 */
+	private $dateFormat;
 
 	/**
 	 * __construct()
@@ -35,17 +69,16 @@ trait UserTrait
 	}
 
 	/**
-	 * createdAtの値をタイムスタンプと見なし、DateTimeImmutableオブジェクトに変換して返します。
+	 * createdAtの値に出力用のTimezoneをセットして返します。
 	 *
 	 * @return \DateTimeImmutable
 	 */
 	public function getCreatedAt()
 	{
-		$createdAt = new \DateTimeImmutable(sprintf('@%d', $this->createdAt));
 		if (isset($this->timezone)) {
-			return $createdAt->setTimezone($this->timezone);
+			return $this->createdAt->setTimezone($this->timezone);
 		}
-		return $createdAt;
+		return $this->createdAt;
 	}
 
 	/**
