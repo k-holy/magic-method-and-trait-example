@@ -69,6 +69,16 @@ class User implements BaseInterface, \JsonSerializable
 	}
 
 	/**
+	 * createdAtの値をセットします。
+	 *
+	 * @param \DateTimeImmutable
+	 */
+	public function setCreatedAt(\DateTimeImmutable $createdAt)
+	{
+		$this->createdAt = $createdAt;
+	}
+
+	/**
 	 * createdAtの値に出力用のTimezoneをセットして返します。
 	 *
 	 * @return \DateTimeImmutable
