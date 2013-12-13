@@ -72,33 +72,15 @@ SQL
 
 		$pdo = $this->createRecord($now);
 
-		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id"));
+		$statement = new PDOStatement($pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :user_id"));
 
-		$statement->execute();
-
+		$statement->execute(['user_id' => 1]);
 		$user = $statement->fetchObject('\Acme\Test\PDOTestDataImmutable', [['timezone' => $timezone, 'dateFormat' => 'Y-m-d H:i:s']]);
 
 		$this->assertNull($user->userId); // プロパティがセットされた後でコンストラクタが呼ばれるため、コンストラクタで指定したプロパティ以外はNULLになってしまう…
 		$this->assertNull($user->userName);
 		$this->assertEquals($timezone, $user->timezone);
 		$this->assertEquals('Y-m-d H:i:s', $user->dateFormat);
-	}
-
-	public function testFetchLazy()
-	{
-		$timezone = new \DateTimeZone('Asia/Tokyo');
-		$now = new \DateTimeImmutable('now', $timezone);
-
-		$pdo = $this->createRecord($now);
-
-		$statement = $pdo->prepare("SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users WHERE user_id = :user_id");
-
-		$statement->execute(['user_id' => 1]);
-
-		$row = $statement->fetch(\PDO::FETCH_LAZY);
-
-		$this->assertInstanceOf('PDORow', $row);
-		$this->assertEquals($statement->queryString, $row->queryString);
 	}
 
 	/**
