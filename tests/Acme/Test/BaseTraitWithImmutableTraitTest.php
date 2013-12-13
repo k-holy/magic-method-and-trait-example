@@ -16,77 +16,77 @@ namespace Acme\Test;
 class BaseTraitWithImmutableTraitTest extends \PHPUnit_Framework_TestCase
 {
 
-	public function testConstructorDefensiveCopy()
-	{
-		$now = new \DateTime();
-		$test = new BaseTraitWithImmutableTraitTestData([
-			'datetime' => $now,
-		]);
-		$this->assertEquals($now, $test->datetime);
-		$this->assertNotSame($now, $test->datetime);
-	}
+    public function testConstructorDefensiveCopy()
+    {
+        $now = new \DateTime();
+        $test = new BaseTraitWithImmutableTraitTestData([
+            'datetime' => $now,
+        ]);
+        $this->assertEquals($now, $test->datetime);
+        $this->assertNotSame($now, $test->datetime);
+    }
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testConstructorRaiseInvalidArgumentExceptionUndefinedProperty()
-	{
-		$test = new BaseTraitWithImmutableTraitTestData([
-			'undefined_property' => 'Foo',
-		]);
-	}
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testConstructorRaiseInvalidArgumentExceptionUndefinedProperty()
+    {
+        $test = new BaseTraitWithImmutableTraitTestData([
+            'undefined_property' => 'Foo',
+        ]);
+    }
 
-	public function testIsset()
-	{
-		$test = new BaseTraitWithImmutableTraitTestData([
-			'string' => 'Foo',
-			'null'   => null,
-		]);
-		$this->assertTrue(isset($test->string));
-		$this->assertFalse(isset($test->null));
-		$this->assertFalse(isset($test->undefined_property));
-	}
+    public function testIsset()
+    {
+        $test = new BaseTraitWithImmutableTraitTestData([
+            'string' => 'Foo',
+            'null'   => null,
+        ]);
+        $this->assertTrue(isset($test->string));
+        $this->assertFalse(isset($test->null));
+        $this->assertFalse(isset($test->undefined_property));
+    }
 
-	public function testGet()
-	{
-		$test = new BaseTraitWithImmutableTraitTestData([
-			'string' => 'Foo',
-			'null'   => null,
-		]);
-		$this->assertEquals('Foo', $test->string);
-		$this->assertNull($test->null);
-	}
+    public function testGet()
+    {
+        $test = new BaseTraitWithImmutableTraitTestData([
+            'string' => 'Foo',
+            'null'   => null,
+        ]);
+        $this->assertEquals('Foo', $test->string);
+        $this->assertNull($test->null);
+    }
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
-	public function testGetRaiseInvalidArgumentExceptionUndefinedProperty()
-	{
-		$test = new BaseTraitWithImmutableTraitTestData();
-		$test->undefined_property;
-	}
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testGetRaiseInvalidArgumentExceptionUndefinedProperty()
+    {
+        $test = new BaseTraitWithImmutableTraitTestData();
+        $test->undefined_property;
+    }
 
-	/**
-	 * @expectedException \LogicException
-	 */
-	public function testSetRaiseLogicException()
-	{
-		$test = new BaseTraitWithImmutableTraitTestData([
-			'string'  => 'Foo',
-			'boolean' => true,
-		]);
-		$test->string = 'Bar';
-	}
+    /**
+     * @expectedException \LogicException
+     */
+    public function testSetRaiseLogicException()
+    {
+        $test = new BaseTraitWithImmutableTraitTestData([
+            'string'  => 'Foo',
+            'boolean' => true,
+        ]);
+        $test->string = 'Bar';
+    }
 
-	/**
-	 * @expectedException \LogicException
-	 */
-	public function testUnsetRaiseLogicException()
-	{
-		$test = new BaseTraitWithImmutableTraitTestData([
-			'string' => 'Foo',
-		]);
-		unset($test->string);
-	}
+    /**
+     * @expectedException \LogicException
+     */
+    public function testUnsetRaiseLogicException()
+    {
+        $test = new BaseTraitWithImmutableTraitTestData([
+            'string' => 'Foo',
+        ]);
+        unset($test->string);
+    }
 
 }

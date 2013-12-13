@@ -1,6 +1,6 @@
 <?php
 /**
- * magic-method-and-trait-example
+ * ドメインデータ
  *
  * @copyright 2013 k-holy <k.holy74@gmail.com>
  * @license The MIT License (MIT)
@@ -16,53 +16,53 @@ namespace Acme\Domain\Data;
 interface DataInterface
 {
 
-	/**
-	 * __isset
-	 *
-	 * @param mixed
-	 * @return bool
-	 */
-	public function __isset($name);
+    /**
+     * __isset
+     *
+     * @param mixed
+     * @return bool
+     */
+    public function __isset($name);
 
-	/**
-	 * __get
-	 *
-	 * @param mixed
-	 */
-	public function __get($name);
+    /**
+     * __get
+     *
+     * @param mixed
+     */
+    public function __get($name);
 
-	/**
-	 * __clone for clone
-	 */
-	public function __clone();
+    /**
+     * __clone for clone
+     */
+    public function __clone();
 
-	/**
-	 * __sleep for serialize()
-	 *
-	 * @return array
-	 */
-	public function __sleep();
+    /**
+     * __sleep for serialize()
+     *
+     * @return array
+     */
+    public function __sleep();
 
-	/**
-	 * __set_state for var_export()
-	 *
-	 * @param array
-	 * @return object
-	 */
-	public static function __set_state($properties);
+    /**
+     * __set_state for var_export()
+     *
+     * @param array
+     * @return object
+     */
+    public static function __set_state($properties);
 
-	/**
-	 * IteratorAggregate::getIterator()
-	 *
-	 * @return \ArrayIterator
-	 */
-	public function getIterator();
+    /**
+     * IteratorAggregate::getIterator()
+     *
+     * @return \ArrayIterator
+     */
+    public function getIterator();
 
-	/**
-	 * JsonSerializable::jsonSerialize
-	 *
-	 * @return \stdClass for json_encode()
-	 */
-	public function jsonSerialize();
+    /**
+     * JsonSerializable::jsonSerialize
+     *
+     * @return \stdClass for json_encode()
+     */
+    public function jsonSerialize();
 
 }

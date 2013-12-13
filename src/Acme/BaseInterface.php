@@ -16,61 +16,61 @@ namespace Acme;
 interface BaseInterface extends \IteratorAggregate
 {
 
-	/**
-	 * __isset
-	 *
-	 * @param mixed
-	 * @return bool
-	 */
-	public function __isset($name);
+    /**
+     * __isset
+     *
+     * @param mixed
+     * @return bool
+     */
+    public function __isset($name);
 
-	/**
-	 * __get
-	 *
-	 * @param mixed
-	 */
-	public function __get($name);
+    /**
+     * __get
+     *
+     * @param mixed
+     */
+    public function __get($name);
 
-	/**
-	 * __set
-	 *
-	 * @param mixed
-	 * @param mixed
-	 */
-	public function __set($name, $value);
+    /**
+     * __set
+     *
+     * @param mixed
+     * @param mixed
+     */
+    public function __set($name, $value);
 
-	/**
-	 * __unset
-	 *
-	 * @param mixed
-	 */
-	public function __unset($name);
+    /**
+     * __unset
+     *
+     * @param mixed
+     */
+    public function __unset($name);
 
-	/**
-	 * __clone for clone
-	 */
-	public function __clone();
+    /**
+     * __clone for clone
+     */
+    public function __clone();
 
-	/**
-	 * __sleep for serialize()
-	 *
-	 * @return array
-	 */
-	public function __sleep();
+    /**
+     * __sleep for serialize()
+     *
+     * @return array
+     */
+    public function __sleep();
 
-	/**
-	 * __set_state for var_export()
-	 *
-	 * @param array
-	 * @return object
-	 */
-	public static function __set_state($properties);
+    /**
+     * __set_state for var_export()
+     *
+     * @param array
+     * @return object
+     */
+    public static function __set_state($properties);
 
-	/**
-	 * IteratorAggregate::getIterator()
-	 *
-	 * @return \ArrayIterator
-	 */
-	public function getIterator();
+    /**
+     * IteratorAggregate::getIterator()
+     *
+     * @return \ArrayIterator
+     */
+    public function getIterator();
 
 }

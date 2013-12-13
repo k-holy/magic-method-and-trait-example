@@ -1,59 +1,31 @@
 <?php
 /**
- * ドメインデータ
+ * magic-method-and-trait-example
  *
  * @copyright 2013 k-holy <k.holy74@gmail.com>
  * @license The MIT License (MIT)
  */
 
-namespace Acme\Domain\Data;
-
-use Acme\Domain\Data\DataInterface;
-use Acme\Domain\Data\DataTrait;
+namespace Acme\Test\PDO;
 
 /**
- * User
+ * PDOTestDataTrait
  *
  * @author k.holy74@gmail.com
  */
-class User implements DataInterface, \IteratorAggregate, \JsonSerializable
+trait PDOTestDataTrait
 {
 
-    use DataTrait;
-
     /**
-     * @var int
-     */
-    private $userId;
-
-    /**
-     * @var string
-     */
-    private $userName;
-
-    /**
-     * @var \DateTimeImmutable
-     */
-    private $createdAt;
-
-    /**
-     * @var \DateTimeZone 日付の出力用タイムゾーン
-     */
-    private $timezone;
-
-    /**
-     * @var string 日付の出力用書式
-     */
-    private $dateFormat;
-
-    /**
-     * createdAtの値をセットします。
+     * __construct()
      *
-     * @param \DateTimeImmutable
+     * @param array プロパティの配列
      */
-    private function setCreatedAt(\DateTimeImmutable $createdAt)
+    public function __construct(array $properties = null)
     {
-        $this->createdAt = $createdAt;
+        if (isset($properties)) {
+            $this->initialize($properties);
+        }
     }
 
     /**
@@ -77,15 +49,17 @@ class User implements DataInterface, \IteratorAggregate, \JsonSerializable
     }
 
     /**
-     * createdAtの値に出力用のTimezoneをセットして返します。
+     * createdAtの値をタイムスタンプと見なし、DateTimeImmutableオブジェクトに変換して返します。
      *
      * @return \DateTimeImmutable
      */
     public function getCreatedAt()
     {
-        return (isset($this->createdAt) && isset($this->timezone))
-            ? $this->createdAt->setTimezone($this->timezone)
-            : $this->createdAt;
+        $createdAt = new \DateTimeImmutable(sprintf('@%d', $this->createdAt));
+        if (isset($this->timezone)) {
+            return $createdAt->setTimezone($this->timezone);
+        }
+        return $createdAt;
     }
 
     /**

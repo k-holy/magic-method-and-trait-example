@@ -18,16 +18,16 @@ use Acme\BaseTrait;
  */
 class BaseTraitTestData implements BaseInterface
 {
-	use BaseTrait;
+    use BaseTrait;
 
-	private $string;
-	private $null;
-	private $boolean;
-	private $datetime;
+    private $string;
+    private $null;
+    private $boolean;
+    private $datetime;
 
-	public function __construct(array $properties = array())
-	{
-		$this->initialize($properties);
-	}
+    public function __construct(array $properties = array())
+    {
+        $this->initialize($properties);
+    }
 
 }

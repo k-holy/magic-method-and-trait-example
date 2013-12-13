@@ -18,19 +18,19 @@ use Acme\JsonSerializer;
 trait JsonSerializableTrait
 {
 
-	/**
-	 * JsonSerializable::jsonSerialize
-	 *
-	 * @return object
-	 */
-	public function jsonSerialize()
-	{
-		$object = new \stdClass;
-		$jsonSerializer = new JsonSerializer();
-		foreach (get_object_vars($this) as $name => $val) {
-			$object->{$name} = $jsonSerializer($val);
-		}
-		return $object;
-	}
+    /**
+     * JsonSerializable::jsonSerialize
+     *
+     * @return object
+     */
+    public function jsonSerialize()
+    {
+        $object = new \stdClass;
+        $jsonSerializer = new JsonSerializer();
+        foreach (get_object_vars($this) as $name => $val) {
+            $object->{$name} = $jsonSerializer($val);
+        }
+        return $object;
+    }
 
 }

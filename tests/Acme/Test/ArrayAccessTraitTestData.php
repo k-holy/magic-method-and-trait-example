@@ -17,11 +17,11 @@ use Acme\ArrayAccessTrait;
  */
 class ArrayAccessTraitTestData implements \ArrayAccess
 {
-	use ArrayAccessTrait;
+    use ArrayAccessTrait;
 
-	private $string;
-	private $null;
-	private $boolean;
-	private $datetime;
+    private $string;
+    private $null;
+    private $boolean;
+    private $datetime;
 
 }

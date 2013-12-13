@@ -19,22 +19,22 @@ use Acme\JsonSerializableTrait;
  */
 class BaseTraitWithJsonSerializableTraitTestData implements BaseInterface, \JsonSerializable
 {
-	use BaseTrait;
-	use JsonSerializableTrait;
+    use BaseTrait;
+    use JsonSerializableTrait;
 
-	private $string;
-	private $null;
-	private $boolean;
-	private $datetime;
-	private $array;
-	private $object;
-	private $traversable;
-	private $serializable;
-	private $any;
+    private $string;
+    private $null;
+    private $boolean;
+    private $datetime;
+    private $array;
+    private $object;
+    private $traversable;
+    private $serializable;
+    private $any;
 
-	public function __construct(array $properties = array())
-	{
-		$this->initialize($properties);
-	}
+    public function __construct(array $properties = array())
+    {
+        $this->initialize($properties);
+    }
 
 }

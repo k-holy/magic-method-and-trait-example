@@ -19,17 +19,17 @@ use Acme\ArrayAccessTrait;
  */
 class BaseTraitWithArrayAccessTraitTestData implements BaseInterface, \ArrayAccess
 {
-	use BaseTrait;
-	use ArrayAccessTrait;
+    use BaseTrait;
+    use ArrayAccessTrait;
 
-	private $string;
-	private $null;
-	private $boolean;
-	private $datetime;
+    private $string;
+    private $null;
+    private $boolean;
+    private $datetime;
 
-	public function __construct(array $properties = array())
-	{
-		$this->initialize($properties);
-	}
+    public function __construct(array $properties = array())
+    {
+        $this->initialize($properties);
+    }
 
 }
