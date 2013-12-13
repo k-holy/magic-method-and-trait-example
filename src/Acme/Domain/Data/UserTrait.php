@@ -20,8 +20,6 @@ trait UserTrait
 	 * __construct()
 	 *
 	 * @param array プロパティの配列
-	 * @param \DateTimeZone タイムゾーン
-	 * @param string 日付の出力書式
 	 */
 	public function __construct(array $properties = null)
 	{
