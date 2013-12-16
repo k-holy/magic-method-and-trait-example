@@ -36,18 +36,28 @@ class PDOTestDataImmutable implements BaseInterface, \JsonSerializable
     private $userName;
 
     /**
+     * @var string Y-m-d
+     */
+    private $birthday;
+
+    /**
      * @var string タイムスタンプ値
      */
     private $createdAt;
 
     /**
-     * @var \DateTimeZone 日付の出力用タイムゾーン
+     * @var \DateTimeImmutable 現在日時
      */
-    private $timezone;
+    private $now;
 
     /**
      * @var string 日付の出力用書式
      */
     private $dateFormat;
+
+    /**
+     * @var string 日時の出力用書式
+     */
+    private $dateTimeFormat;
 
 }

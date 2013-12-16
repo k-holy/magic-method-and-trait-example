@@ -29,23 +29,78 @@ trait PDOTestDataTrait
     }
 
     /**
-     * 日付の出力用タイムゾーンをセットします。
+     * 現在日時をセットします。
      *
-     * @param \DateTimeZone
+     * @param \DateTimeImmutable
      */
-    private function setTimezone(\DateTimeZone $timezone)
+    private function setNow(\DateTimeImmutable $now)
     {
-        $this->timezone = $timezone;
+        $this->now = $now;
     }
 
     /**
      * 日付の出力用書式をセットします。
      *
-     * @param \DateTimeZone
+     * @param string
      */
     private function setDateFormat($dateFormat)
     {
-        $this->dateFormat = $dateFormat ?: 'Y-m-d H:i:s';
+        $this->dateFormat = $dateFormat ?: 'Y-m-d';
+    }
+
+    /**
+     * 日時の出力用書式をセットします。
+     *
+     * @param string
+     */
+    private function setDateTimeFormat($dateTimeFormat)
+    {
+        $this->dateTimeFormat = $dateTimeFormat ?: 'Y-m-d H:i:s';
+    }
+
+    /**
+     * birthdayの値に出力用のTimezoneをセットして返します。
+     *
+     * @return \DateTimeImmutable
+     */
+    public function getBirthday()
+    {
+        if (isset($this->birthday)) {
+            $birthday = new \DateTimeImmutable($this->birthday);
+            if (isset($this->now)) {
+                return $birthday->setTimezone($this->now->getTimezone());
+            }
+            return $birthday;
+        }
+        return null;
+    }
+
+    /**
+     * birthdayの値を出力用の書式で文字列に変換して返します。
+     *
+     * @return string
+     */
+    public function getBirthdayAsString()
+    {
+        $birthday = $this->getBirthday();
+        if (isset($birthday)) {
+            return $birthday->format($this->dateFormat);
+        }
+        return null;
+    }
+
+    /**
+     * 年齢を返します。
+     *
+     * @return int
+     */
+    public function getAge()
+    {
+        $birthday = $this->getBirthday();
+        if (isset($birthday)) {
+            return (int)(((int)$this->now->format('Ymd') - (int)$birthday->format('Ymd')) / 10000);
+        }
+        return null;
     }
 
     /**
@@ -55,11 +110,14 @@ trait PDOTestDataTrait
      */
     public function getCreatedAt()
     {
-        $createdAt = new \DateTimeImmutable(sprintf('@%d', $this->createdAt));
-        if (isset($this->timezone)) {
-            return $createdAt->setTimezone($this->timezone);
+        if (isset($this->createdAt)) {
+            $createdAt = new \DateTimeImmutable(sprintf('@%d', $this->createdAt));
+            if (isset($this->now)) {
+                return $createdAt->setTimezone($this->now->getTimezone());
+            }
+            return $createdAt;
         }
-        return $createdAt;
+        return null;
     }
 
     /**
@@ -69,7 +127,11 @@ trait PDOTestDataTrait
      */
     public function getCreatedAtAsString()
     {
-        return $this->getCreatedAt()->format($this->dateFormat);
+        $createdAt = $this->getCreatedAt();
+        if (isset($createdAt)) {
+            return $createdAt->format($this->dateTimeFormat);
+        }
+        return null;
     }
 
     /**
@@ -82,6 +144,7 @@ trait PDOTestDataTrait
         $object = new \stdClass;
         $object->userId = $this->userId;
         $object->userName = $this->userName;
+        $object->birthday = $this->getBirthdayAsString();
         $object->createdAt = $this->getCreatedAtAsString();
         return $object;
     }
