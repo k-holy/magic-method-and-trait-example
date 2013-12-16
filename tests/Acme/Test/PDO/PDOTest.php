@@ -23,6 +23,7 @@ class PDOTest extends \PHPUnit_Framework_TestCase
         $pdo = new PDO('sqlite::memory:', null, null, [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
         ]);
+        $pdo->setEscapeCharacter('\\');
 
         $pdo->exec('DROP TABLE IF EXISTS users;');
         $pdo->exec(<<<'SQL'
@@ -60,20 +61,26 @@ SQL
 
     public function testQueryWithSetFetchModeToFetchInto()
     {
-        $timezone = new \DateTimeZone('Asia/Tokyo');
-        $now = new \DateTime('now', $timezone);
+        $now = new \DateTimeImmutable('now');
 
         $pdo = $this->createTable();
 
         $pdo->beginTransaction();
         $statement = $pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)");
-        $statement->execute([':user_name' => 'test1', ':created_at' => $now->getTimestamp()]);
+        $statement->execute([
+            ':user_name' => 'test1',
+            ':created_at' => $now->getTimestamp(),
+        ]);
         $pdo->commit();
 
         $statement = $pdo->query(
             "SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id",
             \PDO::FETCH_INTO,
-            new PDOTestDataMutable(null, $timezone, 'Y-m-d H:i:s')
+            new PDOTestDataMutable([
+                'now' => $now,
+                'dateFormat' => 'Y/m/d',
+                'dateTimeFormat' => 'Y-m-d H:i:s',
+            ])
         );
         $user = $statement->fetch();
 
@@ -82,25 +89,93 @@ SQL
 
     public function testQueryWithSetFetchModeToFetchClass()
     {
-        $timezone = new \DateTimeZone('Asia/Tokyo');
-        $now = new \DateTime('now', $timezone);
+        $now = new \DateTimeImmutable('now');
 
         $pdo = $this->createTable();
 
         $pdo->beginTransaction();
         $statement = $pdo->prepare("INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)");
-        $statement->execute([':user_name' => 'test1', ':created_at' => $now->getTimestamp()]);
+        $statement->execute([
+            ':user_name' => 'test1',
+            ':created_at' => $now->getTimestamp(),
+        ]);
         $pdo->commit();
 
         $statement = $pdo->query(
             "SELECT user_id AS userId, user_name AS userName, created_at AS createdAt FROM users ORDER BY user_id",
-            \PDO::FETCH_CLASS,
+            \PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE,
             '\Acme\Test\PDO\PDOTestDataImmutable',
-            [null, $timezone, 'Y-m-d H:i:s']
+            [[
+                'now' => $now,
+                'dateFormat' => 'Y/m/d',
+                'dateTimeFormat' => 'Y-m-d H:i:s',
+            ]]
         );
         $user = $statement->fetch();
 
         $this->assertInstanceOf('\Acme\Test\PDO\PDOTestDataImmutable', $user);
+    }
+
+    public function testEscapeCharacter()
+    {
+        $pdo = $this->createTable();
+        $pdo->setEscapeCharacter('!');
+        $this->assertEquals('!%Foo!%', $pdo->escapeLikePattern('%Foo%'));
+        $this->assertEquals('!_Foo!_', $pdo->escapeLikePattern('_Foo_'));
+    }
+
+    public function testPrepareEscapeLikePattern()
+    {
+        $now = new \DateTimeImmutable('now');
+
+        $pdo = $this->createTable();
+
+        $pdo->beginTransaction();
+        $statement = $pdo->prepare(
+            "INSERT INTO users (user_name, created_at) VALUES (:user_name, :created_at)"
+        );
+        $statement->execute([
+            'user_name' => 'Foo-%RIK%-1',
+            'created_at' => $now->getTimestamp(),
+        ]);
+        $statement->execute([
+            'user_name' => 'Bar-%RIK%-2',
+            'created_at' => $now->getTimestamp(),
+        ]);
+        $statement->execute([
+            'user_name' => 'Baz-%RIK%-3',
+            'created_at' => $now->getTimestamp(),
+        ]);
+        $pdo->commit();
+
+        $statement = $pdo->prepare(
+            "SELECT user_id, user_name, created_at FROM users WHERE user_name LIKE :user_name ESCAPE '\\'"
+        );
+        $statement->setFetchMode(\PDO::FETCH_ASSOC);
+
+        $statement->execute(['user_name' => '%' . $pdo->escapeLikePattern('%RIK%') . '%']);
+
+        $user = $statement->fetch();
+        $this->assertEquals('Foo-%RIK%-1', $user['user_name']);
+
+        $user = $statement->fetch();
+        $this->assertEquals('Bar-%RIK%-2', $user['user_name']);
+
+        $user = $statement->fetch();
+        $this->assertEquals('Baz-%RIK%-3', $user['user_name']);
+
+        $statement->execute(['user_name' => $pdo->escapeLikePattern('Foo-%') . '%']);
+        $user = $statement->fetch();
+        $this->assertEquals('Foo-%RIK%-1', $user['user_name']);
+
+        $statement->execute(['user_name' => $pdo->escapeLikePattern('Bar-%') . '%']);
+        $user = $statement->fetch();
+        $this->assertEquals('Bar-%RIK%-2', $user['user_name']);
+
+        $statement->execute(['user_name' => $pdo->escapeLikePattern('Baz-%') . '%']);
+        $user = $statement->fetch();
+        $this->assertEquals('Baz-%RIK%-3', $user['user_name']);
+
     }
 
 }
