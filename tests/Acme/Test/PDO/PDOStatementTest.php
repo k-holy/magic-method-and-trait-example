@@ -10,6 +10,7 @@ namespace Acme\Test\PDO;
 
 use Acme\PDO\PDOStatement;
 use Acme\Domain\Data\User;
+use Acme\JsonSerializer;
 
 /**
  * Test for PDOStatement
@@ -532,7 +533,8 @@ SQL
         $statement->execute();
         $statement->setFetchMode(\PDO::FETCH_ASSOC);
 
-        $records = $statement->jsonSerialize();
+        $serializer = new JsonSerializer($statement);
+        $records = $serializer->jsonSerialize();
 
         $this->assertEquals('1', $records[0]['user_id']);
         $this->assertEquals('test1', $records[0]['user_name']);
@@ -566,7 +568,8 @@ SQL
         $statement->execute();
         $statement->setFetchMode(\PDO::FETCH_NUM);
 
-        $records = $statement->jsonSerialize();
+        $serializer = new JsonSerializer($statement);
+        $records = $serializer->jsonSerialize();
 
         $this->assertEquals('1', $records[0][0]);
         $this->assertEquals('test1', $records[0][1]);
@@ -600,7 +603,8 @@ SQL
         $statement->execute();
         $statement->setFetchMode(\PDO::FETCH_OBJ);
 
-        $records = $statement->jsonSerialize();
+        $serializer = new JsonSerializer($statement);
+        $records = $serializer->jsonSerialize();
 
         $this->assertEquals('1', $records[0]->userId);
         $this->assertEquals('test1', $records[0]->userName);
@@ -641,7 +645,8 @@ SQL
             ]]
         );
 
-        $records = $statement->jsonSerialize();
+        $serializer = new JsonSerializer($statement);
+        $records = $serializer->jsonSerialize();
 
         $this->assertInstanceOf('\stdClass', $records[0]);
         $this->assertEquals('1', $records[0]->userId);
@@ -683,7 +688,8 @@ SQL
             ])
         );
 
-        $records = $statement->jsonSerialize();
+        $serializer = new JsonSerializer($statement);
+        $records = $serializer->jsonSerialize();
 
         $this->assertInstanceOf('\stdClass', $records[0]);
         $this->assertEquals('1', $records[0]->userId);
@@ -725,7 +731,8 @@ SQL
             new PDOTestDataImmutable(null, $now->getTimezone(), \DateTime::RFC3339)
         );
 
-        $records = $statement->jsonSerialize();
+        $serializer = new JsonSerializer($statement);
+        $records = $serializer->jsonSerialize();
     }
 
     public function testJsonSerializeByFetchCallback()
@@ -760,7 +767,8 @@ SQL
             ]);
         });
 
-        $records = $statement->jsonSerialize();
+        $serializer = new JsonSerializer($statement);
+        $records = $serializer->jsonSerialize();
 
         $this->assertInstanceOf('\stdClass', $records[0]);
         $this->assertEquals(1, $records[0]->userId);
