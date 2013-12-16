@@ -47,7 +47,7 @@ SQL
 
     public function testCallPdoStatementMethod()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -65,7 +65,7 @@ SQL
 
     public function testCallPdoStatementMethodWithArguments()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -106,7 +106,7 @@ SQL
      */
     public function testRaiseExceptionWhenUndefinedMethodIsCalled()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -128,7 +128,7 @@ SQL
 
     public function testExecuteParamInt()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -156,7 +156,7 @@ SQL
 
     public function testExecuteParamStr()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -187,7 +187,7 @@ SQL
      */
     public function testExecuteRaiseExceptionWhenParameterIsInvalidIbject()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -211,7 +211,7 @@ SQL
      */
     public function testExecuteRaiseExceptionWhenParameterIsInvalidType()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -235,7 +235,7 @@ SQL
      */
     public function testExecuteRaiseExceptionWhenPDOExceptionIsThrown()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -256,7 +256,7 @@ SQL
 
     public function testFetchIntoMutableObject()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -299,7 +299,7 @@ SQL
      */
     public function testFetchIntoImmutableObjectRaiseLogicException()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -330,7 +330,7 @@ SQL
 
     public function testFetchClassMutableObject()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -373,7 +373,7 @@ SQL
 
     public function testFetchClassImmutableObject()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -411,7 +411,7 @@ SQL
 
     public function testFetchCallback()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
         $pdo->setAttribute(\PDO::ATTR_DEFAULT_FETCH_MODE, \PDO::FETCH_ASSOC);
@@ -444,7 +444,7 @@ SQL
 
     public function testFetchCallbackInIteration()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -486,7 +486,7 @@ SQL
 
     public function testFetchCallbackReturnedFalseWhenFetchReturnedFalse()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -513,7 +513,7 @@ SQL
 
     public function testJsonSerializeByFetchAssoc()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -547,7 +547,7 @@ SQL
 
     public function testJsonSerializeByFetchNum()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -581,7 +581,7 @@ SQL
 
     public function testJsonSerializeByFetchObject()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -615,7 +615,7 @@ SQL
 
     public function testJsonSerializeByFetchClass()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -658,7 +658,7 @@ SQL
 
     public function testJsonSerializeByFetchInto()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -703,7 +703,7 @@ SQL
      */
     public function testJsonSerializeByFetchIntoRaiseLogicExceptionWhenObjectIsImmutable()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
@@ -730,7 +730,7 @@ SQL
 
     public function testJsonSerializeByFetchCallback()
     {
-        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00');
 
         $pdo = $this->createRecord($now);
 
