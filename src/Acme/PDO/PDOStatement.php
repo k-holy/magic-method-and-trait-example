@@ -15,7 +15,7 @@ use Acme\PDO\CallbackIterator;
  *
  * @author k.holy74@gmail.com
  */
-class PDOStatement implements \IteratorAggregate
+class PDOStatement implements \IteratorAggregate, \JsonSerializable
 {
 
     /**
@@ -138,6 +138,76 @@ class PDOStatement implements \IteratorAggregate
         return (isset($this->callback))
             ? new CallbackIterator($this->statement, $this->callback)
             : new \IteratorIterator($this->statement);
+    }
+
+    /**
+     * JsonSerializable::jsonSerialize()
+     *
+     * @return mixed 変換後の値
+     * @throws \LogicException
+     */
+    public function jsonSerialize()
+    {
+        $values = [];
+        foreach ($this->getIterator() as $i => $current) {
+            $values[$i] = $this->convert($current);
+        }
+        return $values;
+    }
+
+    /**
+     * 全てのプロパティをJSONで表現可能な値に変換して返します。
+     *
+     * NULL および スカラー値はそのまま返します。
+     * 配列であれば イテレーションで取得した値を配列にセットして返します。
+     * JsonSerializable であれば jsonSerialize() メソッドの実行結果を返します。
+     * DateTime または DateTimeInterface であれば RFC3339 形式の文字列に変換して返します。
+     * Traversable であればイテレーションで取得した値を配列にセットして返します。
+     * stdClass であれば get_object_vars() で取得した値を無名オブジェクトにセットして返します。
+     * 上記以外の値がああれば \LogicException をスローします。
+     *
+     * @return mixed 変換後の値
+     * @throws \LogicException
+     */
+    public function convert($value)
+    {
+        if (null === $value || is_scalar($value)) {
+            return $value;
+        }
+        if (is_array($value)) {
+            $array = [];
+            foreach ($value as $name => $val) {
+                $array[$name] = $this->convert($val);
+            }
+            return $array;
+        }
+        if (is_object($value)) {
+            if ($value instanceof \JsonSerializable) {
+                return $value->jsonSerialize();
+            }
+            if ($value instanceof \DateTime || $value instanceof \DateTimeInterface) {
+                return $value->format(\DateTime::RFC3339);
+            }
+            if ($value instanceof \Traversable) {
+                $array = [];
+                foreach ($value as $name => $val) {
+                    $array[$name] = $this->convert($val);
+                }
+                return $array;
+            }
+            if ($value instanceof \stdClass) {
+                $object = new \stdClass;
+                foreach (get_object_vars($value) as $name => $val) {
+                    $object->{$name} = $this->convert($val);
+                }
+                return $object;
+            }
+        }
+        throw new \LogicException(
+            sprintf('The value is invalid to convert JSON. type:%s',
+                is_object($value) ? get_class($value) : gettype($value)
+            )
+        );
     }
 
 }

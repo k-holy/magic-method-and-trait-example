@@ -10,7 +10,6 @@ namespace Acme\Test\PDO;
 
 use Acme\PDO\PDOStatement;
 use Acme\Domain\Data\User;
-use Acme\JsonSerializer;
 
 /**
  * Test for PDOStatement
@@ -48,7 +47,7 @@ SQL
 
     public function testCallPdoStatementMethod()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -66,7 +65,7 @@ SQL
 
     public function testCallPdoStatementMethodWithArguments()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -107,7 +106,7 @@ SQL
      */
     public function testRaiseExceptionWhenUndefinedMethodIsCalled()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -129,7 +128,7 @@ SQL
 
     public function testExecuteParamInt()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -157,7 +156,7 @@ SQL
 
     public function testExecuteParamStr()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -188,7 +187,7 @@ SQL
      */
     public function testExecuteRaiseExceptionWhenParameterIsInvalidIbject()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -212,7 +211,7 @@ SQL
      */
     public function testExecuteRaiseExceptionWhenParameterIsInvalidType()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -236,7 +235,7 @@ SQL
      */
     public function testExecuteRaiseExceptionWhenPDOExceptionIsThrown()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -257,7 +256,7 @@ SQL
 
     public function testFetchIntoMutableObject()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -300,7 +299,7 @@ SQL
      */
     public function testFetchIntoImmutableObjectRaiseLogicException()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -331,7 +330,7 @@ SQL
 
     public function testFetchClassMutableObject()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -374,7 +373,7 @@ SQL
 
     public function testFetchClassImmutableObject()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -445,7 +444,7 @@ SQL
 
     public function testFetchCallbackInIteration()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -473,7 +472,7 @@ SQL
             case 1:
                 $this->assertEquals('test1', $user->userName);
                 $this->assertEquals(new \DateTimeImmutable('1980-12-20', $now->getTimezone()), $user->birthday);
-                $this->assertEquals(32, $user->age);
+                $this->assertEquals(33, $user->age);
                 break;
             case 2:
                 $this->assertEquals('test2', $user->userName);
@@ -487,7 +486,7 @@ SQL
 
     public function testFetchCallbackReturnedFalseWhenFetchReturnedFalse()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -514,7 +513,7 @@ SQL
 
     public function testJsonSerializeByFetchAssoc()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -533,8 +532,7 @@ SQL
         $statement->execute();
         $statement->setFetchMode(\PDO::FETCH_ASSOC);
 
-        $serializer = new JsonSerializer($statement);
-        $records = $serializer->jsonSerialize();
+        $records = $statement->jsonSerialize();
 
         $this->assertEquals('1', $records[0]['user_id']);
         $this->assertEquals('test1', $records[0]['user_name']);
@@ -549,7 +547,7 @@ SQL
 
     public function testJsonSerializeByFetchNum()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -568,9 +566,7 @@ SQL
         $statement->execute();
         $statement->setFetchMode(\PDO::FETCH_NUM);
 
-        $serializer = new JsonSerializer($statement);
-        $records = $serializer->jsonSerialize();
-
+        $records = $statement->jsonSerialize();
 
         $this->assertEquals('1', $records[0][0]);
         $this->assertEquals('test1', $records[0][1]);
@@ -585,7 +581,7 @@ SQL
 
     public function testJsonSerializeByFetchObject()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -604,8 +600,7 @@ SQL
         $statement->execute();
         $statement->setFetchMode(\PDO::FETCH_OBJ);
 
-        $serializer = new JsonSerializer($statement);
-        $records = $serializer->jsonSerialize();
+        $records = $statement->jsonSerialize();
 
         $this->assertEquals('1', $records[0]->userId);
         $this->assertEquals('test1', $records[0]->userName);
@@ -620,7 +615,7 @@ SQL
 
     public function testJsonSerializeByFetchClass()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -646,8 +641,7 @@ SQL
             ]]
         );
 
-        $serializer = new JsonSerializer($statement);
-        $records = $serializer->jsonSerialize();
+        $records = $statement->jsonSerialize();
 
         $this->assertInstanceOf('\stdClass', $records[0]);
         $this->assertEquals('1', $records[0]->userId);
@@ -664,7 +658,7 @@ SQL
 
     public function testJsonSerializeByFetchInto()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -689,8 +683,7 @@ SQL
             ])
         );
 
-        $serializer = new JsonSerializer($statement);
-        $records = $serializer->jsonSerialize();
+        $records = $statement->jsonSerialize();
 
         $this->assertInstanceOf('\stdClass', $records[0]);
         $this->assertEquals('1', $records[0]->userId);
@@ -710,7 +703,7 @@ SQL
      */
     public function testJsonSerializeByFetchIntoRaiseLogicExceptionWhenObjectIsImmutable()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -732,13 +725,12 @@ SQL
             new PDOTestDataImmutable(null, $now->getTimezone(), \DateTime::RFC3339)
         );
 
-        $serializer = new JsonSerializer($statement);
-        $records = $serializer->jsonSerialize();
+        $records = $statement->jsonSerialize();
     }
 
     public function testJsonSerializeByFetchCallback()
     {
-        $now = new \DateTimeImmutable('now', new \DateTimeZone('Asia/Tokyo'));
+        $now = new \DateTimeImmutable('2013-12-20 00:00:00', new \DateTimeZone('Asia/Tokyo'));
 
         $pdo = $this->createRecord($now);
 
@@ -768,8 +760,7 @@ SQL
             ]);
         });
 
-        $serializer = new JsonSerializer($statement);
-        $records = $serializer->jsonSerialize();
+        $records = $statement->jsonSerialize();
 
         $this->assertInstanceOf('\stdClass', $records[0]);
         $this->assertEquals(1, $records[0]->userId);
