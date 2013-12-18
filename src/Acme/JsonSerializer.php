@@ -51,7 +51,7 @@ class JsonSerializer implements \JsonSerializable
     }
 
     /**
-     * 全てのプロパティをJSONで表現可能な値に変換して返します。
+     * 与えられた値をJSONで表現可能な値に変換して返します。
      *
      * NULL および スカラー値はそのまま返します。
      * 配列であれば イテレーションで取得した値を配列にセットして返します。
@@ -61,6 +61,7 @@ class JsonSerializer implements \JsonSerializable
      * stdClass であれば get_object_vars() で取得した値を無名オブジェクトにセットして返します。
      * 上記以外の値がああれば \LogicException をスローします。
      *
+     * @param mixed 変換する値
      * @return mixed 変換後の値
      * @throws \LogicException
      */
