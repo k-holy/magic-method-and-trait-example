@@ -49,15 +49,14 @@ class PDO extends \PDO
     public function query($statement, $fetchMode = null, $fetchOption = null, array $arguments = null)
     {
         switch (func_num_args()) {
-        case 1:
-            return new PDOStatement(parent::query($statement));
-        case 2:
-            return new PDOStatement(parent::query($statement, $fetchMode));
-        case 3:
-            return new PDOStatement(parent::query($statement, $fetchMode, $fetchOption));
         case 4:
             return new PDOStatement(parent::query($statement, $fetchMode, $fetchOption, $arguments));
+        case 3:
+            return new PDOStatement(parent::query($statement, $fetchMode, $fetchOption));
+        case 2:
+            return new PDOStatement(parent::query($statement, $fetchMode));
         }
+        return new PDOStatement(parent::query($statement));
     }
 
     /**
