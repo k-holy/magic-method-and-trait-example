@@ -13,7 +13,7 @@ namespace Acme\Domain\Data;
  *
  * @author k.holy74@gmail.com
  */
-interface DataInterface
+interface DataInterface extends \IteratorAggregate
 {
 
     /**
@@ -57,12 +57,5 @@ interface DataInterface
      * @return \ArrayIterator
      */
     public function getIterator();
-
-    /**
-     * JsonSerializable::jsonSerialize
-     *
-     * @return \stdClass for json_encode()
-     */
-    public function jsonSerialize();
 
 }

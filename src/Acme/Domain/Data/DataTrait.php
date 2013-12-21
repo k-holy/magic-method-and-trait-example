@@ -8,8 +8,6 @@
 
 namespace Acme\Domain\Data;
 
-use Acme\JsonSerializer;
-
 /**
  * DataTrait
  *

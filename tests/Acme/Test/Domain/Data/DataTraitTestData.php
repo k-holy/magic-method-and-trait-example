@@ -16,7 +16,7 @@ use Acme\Domain\Data\DataTrait;
  *
  * @author k.holy74@gmail.com
  */
-final class DataTraitTestData implements DataInterface, \IteratorAggregate, \JsonSerializable
+final class DataTraitTestData implements DataInterface, \JsonSerializable
 {
 	use DataTrait;
 
