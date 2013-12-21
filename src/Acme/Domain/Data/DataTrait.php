@@ -135,7 +135,7 @@ trait DataTrait
      */
     public static function __set_state($properties)
     {
-        return new static($properties);
+        return new self($properties);
     }
 
     /**
