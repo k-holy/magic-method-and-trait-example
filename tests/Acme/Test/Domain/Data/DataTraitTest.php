@@ -19,11 +19,15 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 	public function testConstructorDefensiveCopy()
 	{
 		$now = new \DateTime();
+		$nowImmutable = new \DateTimeImmutable();
 		$test = new DataTraitTestData([
 			'datetime' => $now,
+			'datetimeImmutable' => $nowImmutable,
 		]);
 		$this->assertEquals($now, $test->datetime);
 		$this->assertNotSame($now, $test->datetime);
+		$this->assertEquals($nowImmutable, $test->datetimeImmutable);
+		$this->assertNotSame($nowImmutable, $test->datetimeImmutable);
 	}
 
 	/**
@@ -98,6 +102,15 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($now->format('Y-m-d H:i:s'), $test->datetimeAsString);
 	}
 
+	public function testGetDatetimeImmutableAsString()
+	{
+		$nowImmutable = new \DateTimeImmutable();
+		$test = new DataTraitTestData([
+			'datetimeImmutable' => $nowImmutable,
+		]);
+		$this->assertEquals($nowImmutable->format('Y-m-d H:i:s'), $test->datetimeImmutableAsString);
+	}
+
 	public function testGetDatetimeAsStringWithDateFormat()
 	{
 		$now = new \DateTime();
@@ -108,14 +121,26 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($now->format(\DateTime::RFC3339), $test->datetimeAsString);
 	}
 
+	public function testGetDatetimeImmutableAsStringWithDateFormat()
+	{
+		$nowImmutable = new \DateTimeImmutable();
+		$test = new DataTraitTestData([
+			'datetimeImmutable' => $nowImmutable,
+			'dateFormat' => \DateTime::RFC3339,
+		]);
+		$this->assertEquals($nowImmutable->format(\DateTime::RFC3339), $test->datetimeImmutableAsString);
+	}
+
 	public function testJsonSerialize()
 	{
 		$now = new \DateTime();
+		$nowImmutable = new \DateTimeImmutable();
 		$test = new DataTraitTestData([
 			'string'     => 'Foo',
 			'null'       => null,
 			'boolean'    => true,
 			'datetime'   => $now,
+			'datetimeImmutable' => $nowImmutable,
 			'dateFormat' => \DateTime::RFC3339,
 		]);
 		$data = $test->jsonSerialize();
@@ -124,6 +149,7 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 		$this->assertNull($data->null);
 		$this->assertTrue($data->boolean);
 		$this->assertEquals($now->format(\DateTime::RFC3339), $data->datetime);
+		$this->assertEquals($nowImmutable->format(\DateTime::RFC3339), $data->datetimeImmutable);
 	}
 
 	public function testSerialize()
@@ -133,6 +159,7 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 			'null'       => null,
 			'boolean'    => true,
 			'datetime'   => new \DateTime(),
+			'datetimeImmutable' => new \DateTimeImmutable(),
 			'dateFormat' => \DateTime::RFC3339,
 		]);
 		$deserialized = unserialize(serialize($test));
@@ -140,6 +167,8 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 		$this->assertNotSame($test, $deserialized);
 		$this->assertEquals($test->datetime, $deserialized->datetime);
 		$this->assertNotSame($test->datetime, $deserialized->datetime);
+		$this->assertEquals($test->datetimeImmutable, $deserialized->datetimeImmutable);
+		$this->assertNotSame($test->datetimeImmutable, $deserialized->datetimeImmutable);
 	}
 
 	public function testVarExport()
@@ -149,6 +178,7 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 			'null'       => null,
 			'boolean'    => true,
 			'datetime'   => new \DateTime(),
+			'datetimeImmutable' => new \DateTimeImmutable(),
 			'dateFormat' => \DateTime::RFC3339,
 		]);
 		eval('$exported = ' . var_export($test, true) . ';');
@@ -156,6 +186,8 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 		$this->assertNotSame($test, $exported);
 		$this->assertEquals($test->datetime, $exported->datetime);
 		$this->assertNotSame($test->datetime, $exported->datetime);
+		$this->assertEquals($test->datetimeImmutable, $exported->datetimeImmutable);
+		$this->assertNotSame($test->datetimeImmutable, $exported->datetimeImmutable);
 	}
 
 	public function testClone()
@@ -165,6 +197,7 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 			'null'       => null,
 			'boolean'    => true,
 			'datetime'   => new \DateTime(),
+			'datetimeImmutable' => new \DateTimeImmutable(),
 			'dateFormat' => \DateTime::RFC3339,
 		]);
 		$cloned = clone $test;
@@ -172,16 +205,20 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 		$this->assertNotSame($test, $cloned);
 		$this->assertEquals($test->datetime, $cloned->datetime);
 		$this->assertNotSame($test->datetime, $cloned->datetime);
+		$this->assertEquals($test->datetimeImmutable, $cloned->datetimeImmutable);
+		$this->assertNotSame($test->datetimeImmutable, $cloned->datetimeImmutable);
 	}
 
 	public function testIteration()
 	{
 		$now = new \DateTime();
+		$nowImmutable = new \DateTimeImmutable();
 		$properties = [
 			'string'     => 'Foo',
 			'null'       => null,
 			'boolean'    => true,
 			'datetime'   => $now,
+			'datetimeImmutable' => $nowImmutable,
 			'dateFormat' => \DateTime::RFC3339,
 		];
 		$test = new DataTraitTestData($properties);
@@ -192,6 +229,11 @@ class DataTraitTest extends \PHPUnit_Framework_TestCase
 					$this->assertEquals($now, $value);
 					$this->assertNotSame($now, $value);
 					$this->assertEquals($now->format(\DateTime::RFC3339), $value->format(\DateTime::RFC3339));
+					break;
+				case 'datetimeImmutable':
+					$this->assertEquals($nowImmutable, $value);
+					$this->assertNotSame($nowImmutable, $value);
+					$this->assertEquals($nowImmutable->format(\DateTime::RFC3339), $value->format(\DateTime::RFC3339));
 					break;
 				default:
 					$this->assertEquals($properties[$name], $value);

@@ -24,6 +24,7 @@ final class DataTraitTestData implements DataInterface, \JsonSerializable
 	private $null;
 	private $boolean;
 	private $datetime;
+	private $datetimeImmutable;
 	private $dateFormat;
 
 	/**
@@ -32,6 +33,14 @@ final class DataTraitTestData implements DataInterface, \JsonSerializable
 	private function setDateTime(\DateTime $datetime)
 	{
 		$this->datetime = $datetime;
+	}
+
+	/**
+	 * @param \DateTimeImmutable
+	 */
+	private function setDateTimeImmutable(\DateTimeImmutable $datetimeImmutable)
+	{
+		$this->datetimeImmutable = $datetimeImmutable;
 	}
 
 	/**
@@ -53,6 +62,14 @@ final class DataTraitTestData implements DataInterface, \JsonSerializable
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getDatetimeImmutableAsString()
+	{
+		return (isset($this->datetimeImmutable)) ? $this->datetimeImmutable->format($this->dateFormat ?: 'Y-m-d H:i:s') : null;
+	}
+
+	/**
 	 * JsonSerializable::jsonSerialize
 	 *
 	 * @return \stdClass for json_encode()
@@ -64,6 +81,7 @@ final class DataTraitTestData implements DataInterface, \JsonSerializable
 		$object->null = $this->null;
 		$object->boolean = $this->boolean;
 		$object->datetime = $this->getDatetimeAsString();
+		$object->datetimeImmutable = $this->getDatetimeImmutableAsString();
 		return $object;
 	}
 
